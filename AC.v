@@ -66,12 +66,6 @@ Hint Unfold FiniteSet : Axiom_of_Chioce.
 
 (* Property of Finite Characteristic Set *)
 
-Definition PlusOne x := Union x (Singleton x).
-
-Axiom Mathematical_Induction : forall (P: Class -> Prop),
-  P Φ -> (forall k, k ∈ W /\ P k -> P (PlusOne k)) ->
-  (forall n, n ∈ W -> P n).
-
 Hypothesis HPF_def : forall A φ, A ⊂ ∪ φ -> Finite A ->
   exists C0 C1 C2, (C0∈φ /\ C1∈φ /\ C2∈φ) /\ A ⊂ (C0 ∪ C1 ∪ C2).
 
@@ -88,11 +82,6 @@ Proof.
   - destruct H2; apply H1.
     split; try (apply AxiomVI; apply Theorem33 in H2); auto.
     intro A; intros; destruct H4.
-    (* unfold Finite, W in H5; apply AxiomII in H5; destruct H5.
-    assert (Integer A).
-    { unfold Integer in H6; destruct H6.
-      - clear H10; unfold Ordinal in H6; destruct H6; split.
-        + unfold Connect; intros. *)
     unfold Nest in H3; apply HPF_def in H4; auto.
     destruct H4 as [C0 H4]; destruct H4 as [C1 H4].
     destruct H4 as [C2 H4]; destruct H4, H4, H7.
