@@ -21,7 +21,7 @@ Declare Module AC : Axiom_Choice.
 
 (* Hypotheses *)
 
-Definition En_F' F f :=  \{ λ x, x ∈ (∪f) /\ (F ∪ [x])∈f \}.
+Definition En_F' F f := \{ λ x, x ∈ (∪f) /\ (F ∪ [x])∈f \}.
 
 Definition eq_dec (A : Type) := forall x y: A, {x = y} + {x <> y}.
 Parameter beq : eq_dec Class.

@@ -3,50 +3,7 @@ Require Export Kelley_Set_Theory.
 
 (** Some necessary and additional definitions for the proof **)
 
-(* Proper Subset *)
-
-Definition ProperSubset x y : Prop := x ⊂ y /\ x ≠ y.
-
-Notation "x ⊊ y" := (ProperSubset x y) (at level 70).
-
-Lemma Property_ProperSubset : forall (x y: Class),
-  x ⊂ y -> (x ⊊ y) \/ x = y.
-Proof.
-  intros.
-  generalize (classic (x = y)); intros.
-  destruct H0; auto.
-  left; unfold ProperSubset; auto.
-Qed.
-
-Lemma Property_ProperSubset' : forall (x y: Class),
-  x ⊊ y -> exists z, z ∈ y /\ z ∉ x.
-Proof.
-  intros.
-  unfold ProperSubset in H; destruct H.
-  generalize (Theorem27 x y); intros.
-  apply definition_not with (B:= (x ⊂ y /\ y ⊂ x)) in H0; try tauto.
-  apply property_not in H0; destruct H0; try tauto.
-  unfold Included in H0.
-  apply not_all_ex_not in H0; destruct H0.
-  apply imply_to_and in H0.
-  exists x0; auto.
-Qed.
-
-Lemma Property_ProperSubset'' : forall (x y: Class),
-  x ⊂ y \/ y ⊂ x -> ~ (x ⊂ y) -> y ⊊ x.
-Proof.
-  intros; destruct H.
-  - elim H0; auto.
-  - unfold ProperSubset; split; auto.
-    intro; rewrite H1 in H.
-    pattern x at 2 in H; rewrite <- H1 in H.
-    contradiction.
-Qed.
-
-Hint Unfold ProperSubset : Axiom_of_Choice.
-Hint Resolve Property_ProperSubset Property_ProperSubset'
-             Property_ProperSubset'': Axiom_of_Chioce.
-
+Module BasicDefinition.
 
 (* Nest *)
 
@@ -66,12 +23,6 @@ Hint Unfold FiniteSet : Axiom_of_Chioce.
 
 (* Property of Finite Characteristic Set *)
 
-Definition PlusOne x := Union x (Singleton x).
-
-Axiom Mathematical_Induction : forall (P: Class -> Prop),
-  P Φ -> (forall k, k ∈ W /\ P k -> P (PlusOne k)) ->
-  (forall n, n ∈ W -> P n).
-
 Hypothesis HPF_def : forall A φ, A ⊂ ∪ φ -> Finite A ->
   exists C0 C1 C2, (C0∈φ /\ C1∈φ /\ C2∈φ) /\ A ⊂ (C0 ∪ C1 ∪ C2).
 
@@ -88,11 +39,6 @@ Proof.
   - destruct H2; apply H1.
     split; try (apply AxiomVI; apply Theorem33 in H2); auto.
     intro A; intros; destruct H4.
-    (* unfold Finite, W in H5; apply AxiomII in H5; destruct H5.
-    assert (Integer A).
-    { unfold Integer in H6; destruct H6.
-      - clear H10; unfold Ordinal in H6; destruct H6; split.
-        + unfold Connect; intros. *)
     unfold Nest in H3; apply HPF_def in H4; auto.
     destruct H4 as [C0 H4]; destruct H4 as [C1 H4].
     destruct H4 as [C2 H4]; destruct H4, H4, H7.
@@ -227,4 +173,11 @@ Definition Initial_Segment Y X le := Y ⊂ X /\ WellOrder le X /\
   (forall u v, (u ∈ X /\ v ∈ Y /\ Rrelation u le v ) -> u ∈ Y).
 
 Hint Unfold WellOrderSet : Axiom_of_Chioce.
+
+
+End BasicDefinition.
+
+Export BasicDefinition.
+
+
 

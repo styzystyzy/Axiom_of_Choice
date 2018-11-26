@@ -78,7 +78,7 @@ Proof.
           - unfold Singleton in H5; apply AxiomII in H6; auto.
           - unfold Singleton; apply AxiomII; auto. }
         apply definition_not in H6; auto; clear H8.
-        apply property_not in H6; destruct H6; try contradiction.
+        apply not_and_or in H6; destruct H6; try contradiction.
         apply imply_to_and in H6; destruct H6; clear H6.
         assert (A ⊂ X /\ A ≠ Φ). { split; auto. }
         apply H2 in H6; destruct H6 as [z0 H6]; double H6.

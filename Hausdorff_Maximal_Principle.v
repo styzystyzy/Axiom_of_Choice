@@ -70,7 +70,7 @@ Proof.
     repeat split; try (apply AxiomIV; split); auto.
     rewrite Theorem7; rewrite Theorem5; auto. }
   apply H4 in H5; unfold ProperSubset in H5.
-  apply property_not in H5; destruct H5.
+  apply not_and_or in H5; destruct H5.
   - cut (M ⊂ M ∪ A); intros; try contradiction.
     unfold Included; intros; apply Theorem4; auto.
   - apply NNPP in H5; assert (A ⊂ M).

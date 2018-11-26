@@ -164,7 +164,7 @@ Proof.
         apply Theorem33 in H3; auto.
       * exists y; split; auto.
     + apply AxiomII in H3; destruct H3, H4, H4; rewrite H4; intro.
-      apply H1 in H5; apply property_not in H5; destruct H5.
+      apply H1 in H5; apply not_and_or in H5; destruct H5.
       * unfold ProperSubset in H6; destruct H6; clear H7.
         apply Property_Fs in H6; unfold Rrelation in H6; try apply H2; auto.
         unfold PartialOrder; auto.

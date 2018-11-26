@@ -53,7 +53,7 @@ Proof.
         apply AxiomII in H13; destruct H12, H13; left.
         rewrite H15, H16; auto; unfold Included; auto. }
   apply H2 in H11; unfold ProperSubset in H11.
-  apply property_not in H11; destruct H11.
+  apply not_and_or in H11; destruct H11.
   - absurd (u ⊂ u ∪ [K]); auto.
     unfold Included; intros; apply Theorem4; auto.
   - apply NNPP in H11; assert (K∈u).
