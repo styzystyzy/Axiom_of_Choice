@@ -1,4 +1,5 @@
-(* This document only provides the definition and theorem that we needed in the Axiom_of_Choice.v, and the complete Coq proof of Kelley axiomatic set theory can contact with stycyj@bupt.edu.cn. *)
+(* This document only provides the definition and theorem that we needed in the Axiom_of_Choice.v, 
+   and the complete Coq proof of Kelley axiomatic set theory can contact with stycyj@bupt.edu.cn. *)
 
 Require Export Logic_Property.
 
@@ -714,7 +715,8 @@ Notation "[ x | y ]" := (Unordered x y) (at level 0).
 Hint Unfold Unordered : set.
 
 
-(* Theorem46 : If x is a set and y is a set, then {xy} is a set and z∈{xy} iff z=x or z=y; {xy}=μ if and only if x is not a set or y is not a set. *)
+(* Theorem46 : If x is a set and y is a set, then {xy} is a set and z∈{xy} iff z=x or z=y; 
+               {xy}=μ if and only if x is not a set or y is not a set. *)
 
 Theorem Theorem46 : forall (x y: Class) (z: Class),
   Ensemble x /\ Ensemble y -> Ensemble [x|y] /\ (z∈[x|y] <-> (z=x \/ z=y)).
@@ -810,7 +812,8 @@ Qed.
 Hint Resolve Theorem49 : set.
 
 
-(* Theorem50 : If x and y are sets, then ∪(x,y)={xy}, ∩(x,y)={x}, ∪∩(x,y)=x, ∩∩(x,y)=x, ∪∪(x,y)=x∪y, ∩∪(x,y)=x∩y. *)
+(* Theorem50 : If x and y are sets, then ∪(x,y)={xy}, ∩(x,y)={x}, ∪∩(x,y)=x,
+               ∩∩(x,y)=x, ∪∪(x,y)=x∪y, ∩∪(x,y)=x∩y. *)
 
 Lemma Lemma50 : forall (x y: Class),
   Ensemble x /\ Ensemble y -> Ensemble [x] /\ Ensemble [x | y].
@@ -1055,7 +1058,8 @@ Qed.
 Hint Rewrite Theorem61 : set.
 
 
-(* Definition63 : f is a function iff f is a relation and for each x, each y, each z, if (x,y)∈f and (x,z)∈f, then y = z. *)
+(* Definition63 : f is a function iff f is a relation and for each x, each y, each z,
+                  if (x,y)∈f and (x,z)∈f, then y = z. *)
 
 Definition Function f : Prop :=
   Relation f /\ (forall x y z, [x,y] ∈ f /\ [x,z] ∈ f -> y=z).
@@ -1400,13 +1404,18 @@ Hint Unfold FirstMember : set.
 
 
 (* Definition87
-  Strict and non-strict well orders are closely related. A non-strict well order may be converted to a strict partial order by removing all relationships of the form a ≤ a. Conversely, a strict well order may be converted to a non-strict well order by adjoining all relationships of that form. Thus, if "≤" is a non-strict well order, then the corresponding strict partial order "<" is the irreflexive kernel given by:
+  Strict and non-strict well orders are closely related. A non-strict well order 
+  may be converted to a strict partial order by removing all relationships of the form a ≤ a. 
+  Conversely, a strict well order may be converted to a non-strict well order by adjoining 
+  all relationships of that form. Thus, if "≤" is a non-strict well order, then the corresponding 
+  strict partial order "<" is the irreflexive kernel given by:
 
-a < b if a ≤ b and a ≠ b
+   a < b if a ≤ b and a ≠ b
 
-Conversely, if "<" is a strict well order, then the corresponding non-strict well order "≤" is the reflexive closure given by:
+   Conversely, if "<" is a strict well order, then the corresponding non-strict well order "≤" 
+   is the reflexive closure given by:
 
-a ≤ b if a < b or a = b.*)
+   a ≤ b if a < b or a = b.   *)
 
 Definition KWellOrder r x : Prop :=
   Connect r x /\ (forall y, y⊂x /\ y≠Φ -> exists z, FirstMember z r y).
@@ -1587,7 +1596,8 @@ Hint Unfold E : set.
 
 Definition full x : Prop := forall m, m∈x -> m⊂x.
 
-Corollary Property_Full : forall x:Class, full x <-> (forall u v : Class, v ∈ x /\ u ∈ v -> u ∈ x).
+Corollary Property_Full : forall x:Class,
+  full x <-> (forall u v : Class, v ∈ x /\ u ∈ v -> u ∈ x).
 Proof.
   intros; split; intros.
   - unfold full in H; destruct H0; apply H in H0; auto.
@@ -1746,7 +1756,8 @@ Hint Unfold R : set.
 (* 定理113 *)
 
 Lemma Lemma113 :forall u v,
-  Ensemble u -> Ensemble v -> Ordinal u /\ Ordinal v -> (Rrelation u E v \/ Rrelation v E u \/ u = v) .
+  Ensemble u -> Ensemble v -> Ordinal u /\ Ordinal v -> 
+  (Rrelation u E v \/ Rrelation v E u \/ u = v) .
 Proof.
   intros; apply Theorem110 in H1.
   repeat split.
@@ -1847,21 +1858,21 @@ Proof.
   generalize (classic (\{ λ a ,a ∈ (dom(f) ∩ dom( h)) /\ f [a] ≠ h [a] \} = Φ)); intro; destruct H6.
   - destruct H5.
     + right; unfold Included; intros; rewrite Theorem70 in H7; auto; PP H7 a b.
-        double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
-         apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
-        split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
-        assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
-        { apply AxiomII; split; Ens; split; auto.
-           apply Theorem30 in H5; rewrite H5; auto. }
-        eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
+      double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
+      apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
+      split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
+      assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+      { apply AxiomII; split; Ens; split; auto.
+      apply Theorem30 in H5; rewrite H5; auto. }
+      eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
     + left; unfold Included; intros; rewrite Theorem70 in H7; auto; PP H7 a b.
-        double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
-         apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
-        split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
-        assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
-        { apply AxiomII; split; Ens; split; auto.
-           apply Theorem30 in H5; rewrite Theorem6'; rewrite H5; auto. }
-        eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
+      double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
+      apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
+      split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
+      assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+      { apply AxiomII; split; Ens; split; auto.
+        apply Theorem30 in H5; rewrite Theorem6'; rewrite H5; auto. }
+      eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
   - assert (exists u, FirstMember u E \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
     { apply Theorem107 in H0; unfold KWellOrder in H0; apply H0; split; auto.
        unfold Included; intros; apply AxiomII in H7; destruct H7, H8; apply AxiomII in H8; tauto. }
@@ -1869,29 +1880,29 @@ Proof.
     apply AxiomII in H7; destruct H7, H9; apply AxiomII in H9; destruct H9 as [_[H9 H11]].
     generalize (H1 _ H9); generalize (H4 _ H11); intros.
     assert ((h | (u)) = (f | (u))).
-    {  apply AxiomI; intros; split; intros.
-        + apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
-            apply AxiomII_P in H17; destruct H17 ,H18.
-            generalize H15 as H22; intro; apply Property_dom in H22.
-            rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
-            apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
-            rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
-            assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
-            { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
-               unfold Ordinal in H0; destruct H0; unfold full in H23; apply H23 in H9; auto. }
-            apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
-            apply Theorem49; split; try Ens.
-        + apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
-            apply AxiomII_P in H17; destruct H17 ,H18.
-            generalize H15 as H22; intro; apply Property_dom in H22.
-            rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
-            apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
-            rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
-            assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
-            { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
-               unfold Ordinal in H3; destruct H3; unfold full in H23; apply H23 in H11; auto. }
-            apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
-            apply Theorem49; split; try Ens. }
+    { apply AxiomI; intros; split; intros.
+      - apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
+        apply AxiomII_P in H17; destruct H17 ,H18.
+        generalize H15 as H22; intro; apply Property_dom in H22.
+        rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
+        apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
+        rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
+        assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+        { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
+          unfold Ordinal in H0; destruct H0; unfold full in H23; apply H23 in H9; auto. }
+        apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
+        apply Theorem49; split; try Ens.
+      - apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
+        apply AxiomII_P in H17; destruct H17 ,H18.
+        generalize H15 as H22; intro; apply Property_dom in H22.
+        rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
+        apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
+        rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
+        assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+        { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
+          unfold Ordinal in H3; destruct H3; unfold full in H23; apply H23 in H11; auto. }
+        apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
+        apply Theorem49; split; try Ens. }
   rewrite <- H14 in H13; rewrite <- H12 in H13; contradiction.
 Qed.
 
@@ -1907,7 +1918,8 @@ Proof.
   eapply H3; eauto.
 Qed.
 
-Lemma Lemma128' : forall f x, Ordinal dom(f) -> Ordinal_Number x -> ~ x ∈ dom(f) -> f | (x) = f .
+Lemma Lemma128' : forall f x,
+  Ordinal dom(f) -> Ordinal_Number x -> ~ x ∈ dom(f) -> f | (x) = f .
 Proof.
   intros; apply AxiomI; split; intros.
   - apply AxiomII in H2; tauto.
@@ -1916,9 +1928,8 @@ Proof.
     split.
     * unfold Ordinal in H0; apply AxiomII in H0; destruct H0.
        generalize (Theorem110 _ _ (Lemma_xy _ _ H H4)); intro.
-       apply Property_dom in H2; auto; destruct H5 as [H5 | [H5 | H5]]; try contradiction.
-       eapply Lemma128; eauto.
-       rewrite H5 in H2; auto.
+       apply Property_dom in H2; auto; destruct H5 as [H5|[H5|H5]]; try contradiction.
+       eapply Lemma128; eauto; rewrite H5 in H2; auto.
     * apply Property_ran in H2; apply Theorem19; Ens.
 Qed.
 
