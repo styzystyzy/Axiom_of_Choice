@@ -477,7 +477,7 @@ Proof.
   unfold ProperSubset in H; destruct H.
   generalize (Theorem27 x y); intros.
   apply definition_not with (B:= (x ⊂ y /\ y ⊂ x)) in H0; try tauto.
-  apply property_not in H0; destruct H0; try tauto.
+  apply not_and_or in H0; destruct H0; try tauto.
   unfold Included in H0.
   apply not_all_ex_not in H0; destruct H0.
   apply imply_to_and in H0.
@@ -1125,12 +1125,12 @@ Hint Unfold Value : set.
 
 (* 定理69 如果x∉f的定义域，则f[x]=μ;如果x∈f的定义域，则f[x]∈μ*)
 
-Lemma Lemma69 : forall (x y f:Class),
+Lemma Lemma69 : forall x f,
   Function f -> ( x ∉ dom( f ) -> \{ λ y, [x,y] ∈ f \} = Φ ) /\
   ( x ∈ dom( f ) -> \{ λ y, [x,y] ∈ f \} <> Φ ).
 Proof.
   intros; split; intros.
-  - generalize (classic (\{ λ y0, [x, y0] ∈ f \} = Φ)); intro. 
+  - generalize (classic (\{ λ y0, [x, y0] ∈ f \} = Φ)); intro.
     destruct H1; auto; apply Property_NotEmpty in H1; auto.
     elim H1; intro z; intros; apply AxiomII in H2.
     destruct H2 as [H2 H3]; apply Property_dom in H3; contradiction.
@@ -1139,17 +1139,26 @@ Proof.
     split; auto; apply Property_ran in H0; Ens.
 Qed.
 
-Theorem Theorem69 : forall (x f:Class),
-  Function f -> ( x ∉ (dom( f )) -> f[x] = μ ) /\
-  ( x ∈ dom( f ) -> (f[x]) ∈  μ ).
+Theorem Theorem69 : forall x f,
+  ( x ∉ (dom( f )) -> f[x] = μ ) /\ ( x ∈ dom( f ) -> (f[x]) ∈  μ ).
 Proof.
   intros; split; intros.
-  - apply Lemma69 in H0; auto.
-    unfold Value.
-    rewrite H0; apply Theorem24.
-  - apply Lemma69 in H0; auto.
-    apply Theorem35 in H0; auto.
-  apply Theorem19; auto.
+  - assert (\{ λ y, [x,y] ∈ f \} = Φ).
+    { apply AxiomI; split; intros.
+       apply AxiomII in H0; destruct H0.
+       apply Property_dom in H1; contradiction.
+       generalize (Theorem16 z); intro; contradiction. }
+    unfold Value; rewrite H0; apply Theorem24.
+  - assert (\{ λ y, [x,y] ∈ f \} <> Φ).
+    { intro.
+       apply AxiomII in H; destruct H, H1.
+       generalize (AxiomI \{ λ y : Class,[x, y] ∈ f \} Φ); intro; destruct H2.
+       apply H2 with x0 in H0; destruct H0.
+       assert (x0 ∈ Φ).
+       { apply H0; apply AxiomII; split; auto.
+          AssE [x, x0];  apply Theorem49 in H5; tauto. }
+       eapply Theorem16; eauto. }
+     apply Theorem35 in H0; apply Theorem19; auto.
 Qed.
 
 Hint Resolve Theorem69 : set.
@@ -1318,6 +1327,26 @@ Qed.
 Hint Resolve Theorem74 : set.
 
 
+(* 定理75 如果f是一个函数同时f的定义域是一个集，则f是一个集 *)
+
+Theorem Theorem75 : forall f, 
+  Function f /\ Ensemble dom( f ) -> Ensemble f.
+Proof.
+  intros; destruct H.
+  assert (Ensemble ran(f)); try apply AxiomV; auto.
+  assert (Ensemble (dom( f)) × (ran( f))).
+  { apply Theorem74; split; auto. }
+  apply Theorem33 with (x:=(dom( f ) × ran( f ))); auto.
+  unfold Included; intros; rewrite Theorem70 in H3; auto.
+  PP H3 a b; rewrite <- Theorem70 in H4; auto; AssE [a,b].
+  repeat split; auto; apply AxiomII_P; split; auto.
+  generalize (Property_dom a b f H4); intro.
+  generalize (Property_ran a b f H4); intro; tauto.
+Qed.
+
+Hint Resolve Theorem75 : set.
+
+
 (* 定义78 f在x上，当且仅当f为一函数同时x=f的定义域 *)
 
 Definition On f x : Prop :=  (Function f /\ dom( f ) = x).
@@ -1370,12 +1399,19 @@ Definition FirstMember z r x : Prop :=
 Hint Unfold FirstMember : set.
 
 
-(* 定义87 *)
+(* Definition87
+  Strict and non-strict well orders are closely related. A non-strict well order may be converted to a strict partial order by removing all relationships of the form a ≤ a. Conversely, a strict well order may be converted to a non-strict well order by adjoining all relationships of that form. Thus, if "≤" is a non-strict well order, then the corresponding strict partial order "<" is the irreflexive kernel given by:
 
-Definition WellOrder r x : Prop :=
+a < b if a ≤ b and a ≠ b
+
+Conversely, if "<" is a strict well order, then the corresponding non-strict well order "≤" is the reflexive closure given by:
+
+a ≤ b if a < b or a = b.*)
+
+Definition KWellOrder r x : Prop :=
   Connect r x /\ (forall y, y⊂x /\ y≠Φ -> exists z, FirstMember z r y).
 
-Hint Unfold WellOrder : set.
+Hint Unfold KWellOrder : set.
 
 
 (* 定理88 *)
@@ -1391,10 +1427,11 @@ Proof.
     + right; right; apply AxiomII in H4; destruct H4; auto.
 Qed.
 
-Theorem Theorem88 : forall r x, WellOrder r x -> Transitive r x /\ Asymmetry r x .
+Theorem Theorem88 : forall r x,
+  KWellOrder r x -> Transitive r x /\ Asymmetry r x .
 Proof.
   intros; generalize H; intro.
-  unfold WellOrder in H0; destruct H0.
+  unfold KWellOrder in H0; destruct H0.
   assert (Asymmetry r x).
   { unfold Asymmetry; intros.
      destruct H2, H3; AssE u; AssE v.
@@ -1403,8 +1440,7 @@ Proof.
         - unfold Included; intros; apply AxiomII in H7; destruct H7, H8.
           + apply Theorem19 in H5; apply AxiomII in H8; destruct H8; rewrite H9; auto.
           + apply Theorem19 in H6; apply AxiomII in H8; destruct H8; rewrite H9; auto.
-        - apply Property_NotEmpty; exists u; apply AxiomII.
-         split; auto;  left; apply AxiomII; split; auto. }
+        - apply Property_NotEmpty; exists u; apply AxiomII; split; auto;  left; apply AxiomII; split; auto. }
   apply H1 in H7; destruct H7; unfold FirstMember in H7; destruct H7.
   apply Theorem46 in H7; auto; destruct H7; subst x0.
   - assert (v ∈ [u | v]).
@@ -1449,7 +1485,7 @@ Hint Resolve Theorem88: set.
 (* 定义89 *)
 
 Definition Section y r x : Prop :=
-  y ⊂ x /\ WellOrder r x /\
+  y ⊂ x /\ KWellOrder r x /\
   (forall u v, (u ∈ x /\ v ∈ y /\ Rrelation u r v) -> u ∈ y).
 
 Hint Unfold Section : set.
@@ -1463,7 +1499,7 @@ Theorem Theorem91 : forall x y r,
 Proof.
   intros; destruct H.
   assert (exists v, FirstMember v r (x ~ y)).
-  { unfold Section, WellOrder in H; destruct H, H1, H1.
+  { unfold Section, KWellOrder in H; destruct H, H1, H1.
     assert ((x ~ y) ⊂ x).
     { red; intros; apply AxiomII in H4; tauto. }
     generalize (classic (x ~ y = Φ)); intro; destruct H5.
@@ -1476,7 +1512,7 @@ Proof.
   unfold Section in H; destruct H, H6.
   - apply AxiomII; repeat split; Ens.
     assert (z ∈ x); auto.
-    unfold WellOrder, Connect in H6; destruct H6 as [H6 _].
+    unfold KWellOrder, Connect in H6; destruct H6 as [H6 _].
     specialize H6 with x0 z; destruct H6 as [H6|[H6|H6]]; auto.
     + assert (x0 ∈ y).
       { apply H7 with z; repeat split; auto. }
@@ -1497,6 +1533,19 @@ Hint Resolve Theorem91 : set.
 Definition Function1_1 f : Prop := Function f /\ Function (f ⁻¹).
 
 Hint Unfold Function1_1 : set.
+
+
+Lemma Lemma97 : forall y r x,
+  KWellOrder r x -> y ⊂ x -> KWellOrder r y.
+Proof.
+  intros; unfold KWellOrder in H; destruct H.
+  unfold KWellOrder; intros; split; intros.
+  - red; intros.
+    apply H; destruct H2; split; auto.
+  - specialize H1 with y0.
+    apply H1; destruct H2.
+    split; auto; eapply Theorem28; eauto.
+Qed.
 
 
 (* 正则公理 VII *)
@@ -1538,6 +1587,13 @@ Hint Unfold E : set.
 
 Definition full x : Prop := forall m, m∈x -> m⊂x.
 
+Corollary Property_Full : forall x:Class, full x <-> (forall u v : Class, v ∈ x /\ u ∈ v -> u ∈ x).
+Proof.
+  intros; split; intros.
+  - unfold full in H; destruct H0; apply H in H0; auto.
+  - unfold full; intros; unfold Included; intros; apply H with m; tauto.
+Qed.
+
 Hint Unfold full : set.
 
 
@@ -1550,11 +1606,11 @@ Hint Unfold Ordinal : set.
 
 (* 定理107 *)
 
-Theorem Theorem107 : forall x, Ordinal x -> WellOrder E x.
+Theorem Theorem107 : forall x, Ordinal x -> KWellOrder E x.
 Proof.
   intros.
   unfold Ordinal in H; destruct H.
-  unfold WellOrder; intros.
+  unfold KWellOrder; intros.
   split; auto; intros; destruct H1.
   apply AxiomVII in H2; destruct H2, H2.
   exists x0; unfold FirstMember; intros.
@@ -1650,11 +1706,119 @@ Qed.
 Hint Resolve Theorem110 : set.
 
 
+(* 定理111 *)
+
+Theorem Theorem111 : forall x y, Ordinal x /\ y ∈ x -> Ordinal y.
+Proof.
+  intros; destruct H; double H.
+  unfold Ordinal in H; destruct H.
+  assert (Connect E y).
+  { unfold Connect; intros; unfold Ordinal in H1; apply H1 in H0.
+     assert (u ∈ x /\ v ∈ x). { destruct H3; split; auto. }
+     apply H; auto. }
+  unfold Ordinal; split; auto.
+  unfold full; intros; unfold Included; intros.
+  apply Theorem107 in H1; unfold Ordinal in H1.
+  assert (y ⊂ x); auto; assert (m ∈ x); auto.
+  assert (m⊂ x); auto; assert (z ∈ x); auto.
+  apply Theorem88 in H1; destruct H1.
+  unfold Transitive in H1; specialize H1 with z m y.
+  assert (Rrelation z E y).
+  { apply H1.
+     repeat split; Ens.
+     + unfold Rrelation; apply AxiomII_P; split; auto.
+         apply Theorem49; split; Ens.
+     + unfold Rrelation; apply AxiomII_P; split; auto.
+         apply Theorem49; split; Ens. }
+  unfold Rrelation in H11; apply AxiomII_P in H11; tauto.
+Qed.
+
+Hint Resolve Theorem111 : set.
+
+
 (* 定义112 *)
 
 Definition R : Class := \{ λ x, Ordinal x \}.
 
 Hint Unfold R : set.
+
+
+(* 定理113 *)
+
+Lemma Lemma113 :forall u v,
+  Ensemble u -> Ensemble v -> Ordinal u /\ Ordinal v -> (Rrelation u E v \/ Rrelation v E u \/ u = v) .
+Proof.
+  intros; apply Theorem110 in H1.
+  repeat split.
+  - destruct H1 as [H1 | [H1 | H1]].
+    * left; unfold Rrelation; apply AxiomII_P; split; Ens.
+       apply Theorem49; auto.
+    * right; left; apply AxiomII_P; split; Ens.
+       apply Theorem49; auto.
+     * right; right; auto.
+Qed.
+
+Theorem Theorem113 : Ordinal R /\ ~ Ensemble R.
+Proof.
+  intros.
+  assert (Ordinal R).
+  { unfold Ordinal; intros; split.
+     - unfold Connect; intros; destruct H.
+       apply AxiomII in H; destruct H; apply AxiomII in H0; destruct H0.
+       generalize (Lemma_xy _ _ H1 H2); intro; apply Lemma113; auto.
+     - unfold full; intros; apply AxiomII in H; destruct H.
+       unfold Included; intros; apply AxiomII; split; Ens.
+       eapply Theorem111; eauto. }
+  split; auto; intro.
+  assert (R ∈ R).
+  { apply AxiomII; split; auto. }
+  apply Theorem101 in H1; auto.
+Qed.
+
+Hint Resolve Theorem113 : set.
+
+
+(* 定理114 *)
+
+Theorem Theorem114 : forall x, Section x E R -> Ordinal x.
+Proof.
+  intros.
+  generalize (classic (x = R)); intro; destruct H0.
+  - rewrite H0; apply Theorem113.
+  - generalize (Lemma_xy _ _ H H0); intro.
+    apply Theorem91 in H1; destruct H1, H1.
+    assert (x0 = \{ λ u : Class,u ∈ R /\ Rrelation u E x0 \}).
+    { apply AxiomI; split; intros.
+       + apply AxiomII; repeat split; Ens.
+          * apply AxiomII in H1; destruct H1.
+             apply AxiomII; split; Ens; eapply Theorem111; eauto.
+          * red; apply AxiomII_P; split; auto.
+             apply Theorem49; Ens.
+       + apply AxiomII in H3; destruct H3, H4.
+           unfold Rrelation in H5; apply AxiomII_P in H5; tauto. }
+    subst x; rewrite H3 in H1; apply AxiomII in H1; tauto.
+Qed.
+
+Corollary Lemma114 : forall x, Ordinal x -> Section x E R.
+Proof.
+  intros; unfold Section; split.
+  - unfold Included; intros.
+    apply AxiomII; split; try Ens.
+    eapply Theorem111; eauto.
+  - split; intros.
+    apply Theorem107; apply Theorem113.
+    destruct H0, H1; unfold Ordinal in H2; apply AxiomII_P in H2; destruct H2.
+    unfold Ordinal in H; destruct H; apply H4 in H1; auto.
+Qed.
+
+Hint Resolve Theorem114 : set.
+
+
+(* 定义115 *)
+
+Definition Ordinal_Number x : Prop := In x R.
+
+Hint Unfold Ordinal_Number : set.
 
 
 (* 定义116 *)
@@ -1666,9 +1830,308 @@ Notation "x ≺ y" := (Less x y)(at level 67, left associativity).
 Hint Unfold Less : set.
 
 
+(* 定义125 *)
+
+Definition Restriction f x : Class := f ∩ (x) × μ.
+
+Notation "f | ( x )" := (Restriction f x)(at level 40).
+
+
+(* 定理127 *)
+
+Theorem Theorem127 : forall f h g,
+  Function f -> Ordinal dom( f) -> (forall u0 : Class, u0 ∈ dom( f) -> f [u0] = g [f | (u0)]) ->
+  Function h -> Ordinal dom( h) -> (forall u1 : Class, u1 ∈ dom( h) -> h [u1] = g [h | (u1)]) -> h ⊂ f \/ f ⊂ h.
+Proof.
+  intros; generalize (Lemma_xy _ _ H0 H3); intro; apply Theorem109 in H5.
+  generalize (classic (\{ λ a ,a ∈ (dom(f) ∩ dom( h)) /\ f [a] ≠ h [a] \} = Φ)); intro; destruct H6.
+  - destruct H5.
+    + right; unfold Included; intros; rewrite Theorem70 in H7; auto; PP H7 a b.
+        double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
+         apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
+        split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
+        assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+        { apply AxiomII; split; Ens; split; auto.
+           apply Theorem30 in H5; rewrite H5; auto. }
+        eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
+    + left; unfold Included; intros; rewrite Theorem70 in H7; auto; PP H7 a b.
+        double H8; rewrite <- Theorem70 in H8; auto; apply Property_dom in H8.
+         apply AxiomII_P in H9; destruct H9; rewrite Theorem70; auto; apply AxiomII_P.
+        split; auto; rewrite H10; generalize (classic (f[a] = h[a])); intro; destruct H11; auto.
+        assert (a ∈  \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+        { apply AxiomII; split; Ens; split; auto.
+           apply Theorem30 in H5; rewrite Theorem6'; rewrite H5; auto. }
+        eapply AxiomI in H6; apply H6 in H12; generalize (Theorem16 a); contradiction.
+  - assert (exists u, FirstMember u E \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+    { apply Theorem107 in H0; unfold KWellOrder in H0; apply H0; split; auto.
+       unfold Included; intros; apply AxiomII in H7; destruct H7, H8; apply AxiomII in H8; tauto. }
+    destruct H7 as [u H7]; unfold FirstMember in H7; destruct H7.
+    apply AxiomII in H7; destruct H7, H9; apply AxiomII in H9; destruct H9 as [_[H9 H11]].
+    generalize (H1 _ H9); generalize (H4 _ H11); intros.
+    assert ((h | (u)) = (f | (u))).
+    {  apply AxiomI; intros; split; intros.
+        + apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
+            apply AxiomII_P in H17; destruct H17 ,H18.
+            generalize H15 as H22; intro; apply Property_dom in H22.
+            rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
+            apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
+            rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
+            assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+            { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
+               unfold Ordinal in H0; destruct H0; unfold full in H23; apply H23 in H9; auto. }
+            apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
+            apply Theorem49; split; try Ens.
+        + apply AxiomII in H14; destruct H14, H15; apply AxiomII; repeat split; auto; PP H16 a b.
+            apply AxiomII_P in H17; destruct H17 ,H18.
+            generalize H15 as H22; intro; apply Property_dom in H22.
+            rewrite Theorem70 in H15; auto; rewrite Theorem70; auto.
+            apply AxiomII_P in H15; destruct H15; apply AxiomII_P; split; auto.
+            rewrite H20; symmetry; generalize (classic (f [a] = h [a])); intro; destruct H21; auto.
+            assert (a ∈ \{ λ a : Class,a ∈ (dom( f) ∩ dom( h)) /\ f [a] ≠ h [a] \}).
+            { apply AxiomII; repeat split; auto; try Ens; apply AxiomII; repeat split; auto; try Ens.
+               unfold Ordinal in H3; destruct H3; unfold full in H23; apply H23 in H11; auto. }
+            apply H8 in H23; elim H23; red; apply AxiomII_P; split; auto.
+            apply Theorem49; split; try Ens. }
+  rewrite <- H14 in H13; rewrite <- H12 in H13; contradiction.
+Qed.
+
+Hint Resolve Theorem127 : set.
+
+
+(* 定理128 *)
+
+Lemma Lemma128 : forall u v w, Ordinal u -> v ∈ u -> w ∈ v -> w ∈ u.
+Proof.
+  intros; unfold Ordinal in H; destruct H.
+  generalize (Property_Full u); intro; destruct H3.
+  eapply H3; eauto.
+Qed.
+
+Lemma Lemma128' : forall f x, Ordinal dom(f) -> Ordinal_Number x -> ~ x ∈ dom(f) -> f | (x) = f .
+Proof.
+  intros; apply AxiomI; split; intros.
+  - apply AxiomII in H2; tauto.
+  - apply AxiomII; split; Ens; split; auto.
+    PP' H3; apply AxiomII_P; split; Ens.
+    split.
+    * unfold Ordinal in H0; apply AxiomII in H0; destruct H0.
+       generalize (Theorem110 _ _ (Lemma_xy _ _ H H4)); intro.
+       apply Property_dom in H2; auto; destruct H5 as [H5 | [H5 | H5]]; try contradiction.
+       eapply Lemma128; eauto.
+       rewrite H5 in H2; auto.
+    * apply Property_ran in H2; apply Theorem19; Ens.
+Qed.
+
+Definition En_f' g := \{\ λ u v, u ∈ R /\ (exists h, Function h /\ Ordinal dom(h) 
+  /\ (forall z, z ∈ dom(h) -> h[z] = g [h | (z)] ) /\ [u,v] ∈ h ) \}\.
+
+Theorem Theorem128 :  forall g,
+  exists f, Function f /\ Ordinal dom(f) /\ (forall x, Ordinal_Number x -> f [x] = g [f | (x)]).
+Proof.
+  intros; exists (En_f' g).
+  assert (Function (En_f' g)).
+  { unfold Function; intros; split; intros.
+    + unfold Relation; intros; PP H a b; eauto.
+    + destruct H; apply AxiomII_P in H; apply AxiomII_P in H0.
+       destruct H, H1, H2, H2, H3, H4, H0, H6, H7, H7, H8, H9.
+       generalize (Theorem127 _ _ _ H2 H3 H4 H7 H8 H9); intro; destruct H11.
+       * apply H11 in H10; eapply H2; eauto.
+       * apply H11 in H5; eapply H7; eauto. }
+    split; auto.
+  - assert (Ordinal dom( En_f' g)).
+    { apply Theorem114; unfold Section; intros.
+        split.
+        * unfold Included; intros; apply AxiomII in H0; destruct H0, H1.
+           apply AxiomII_P in H1; tauto.
+        * split; intros.
+           -- apply Theorem107; apply Theorem113.
+           -- destruct H0, H1; apply AxiomII in H1; destruct H1, H3.
+               apply AxiomII_P in H3; destruct H3, H4, H5, H5, H6, H7.
+               apply AxiomII_P in H2; destruct H2; apply Theorem49 in H2; destruct H2.
+               apply AxiomII; split; auto; apply Property_dom in H8.
+               assert (u ∈ dom( x0)). { eapply Lemma128; eauto. }
+               exists (x0[u]); apply AxiomII_P; split; try apply Theorem49; split; auto.
+               + apply Theorem19; apply Theorem69; auto.
+               + exists x0; split; auto; split; auto; split; auto.
+                  apply Property_Value; auto. }
+    split; intros; auto.
+    generalize (classic (x ∈ dom(En_f' g))); intro; destruct H2.
+    * apply AxiomII in H2; destruct H2, H3.
+       apply AxiomII_P in H3; destruct H2, H3, H4; destruct H5 as [h [H5 [H6 [H7 H8]]]].
+        assert (h ⊂ En_f' g).
+        { unfold Included; intros; PP' H10; apply AxiomII_P.
+           split; try Ens; double H9.
+           apply Property_dom in H9; split; try apply AxiomII.
+           - split; try Ens; eapply Theorem111; eauto.
+           - exists h; tauto. }
+    generalize H8; intro; apply H9 in H10.
+    generalize H8; intro; apply Property_dom in H11; apply H7 in H11.
+    generalize H8; intro; apply Property_dom in H12.
+    apply Property_dom in H8; apply Property_Value in H8; auto.
+    apply Property_dom in H10; apply Property_Value in H10; auto.
+    apply H9 in H8.
+    assert (h [x] = (En_f' g) [x]). { eapply H; eauto. }
+    rewrite <- H13; clear H13.
+    assert (h | (x) = En_f' g | (x)).
+    { apply AxiomI; split; intros; apply AxiomII in H13; destruct H13, H14.
+       apply AxiomII; repeat split; auto; apply AxiomII in H13; destruct H13, H14.
+       apply AxiomII; repeat split; auto; rewrite Theorem70; auto.
+       PP H15 a b; apply AxiomII_P in H16; apply AxiomII_P; split; auto.
+       destruct H16, H17.
+       assert (a ∈ dom(h)). { eapply Lemma128; eauto. }
+       apply Property_Value in H19; auto; apply H9 in H19; eapply H; eauto. }
+       rewrite <- H13; auto.
+    * generalize H2; intro; apply Theorem69 in H2; auto; rewrite (Lemma128' _ _ H0 H1 H3).
+         generalize (classic (En_f' g ∈ dom(g))); intro; destruct H4.
+         + generalize Theorem113; intro; destruct H5 as [H5 _]; apply Theorem107 in H5.
+            unfold KWellOrder  in H5; destruct H5.
+         assert ((R ~ dom(En_f' g)) ⊂ R /\ (R ~ dom(En_f' g)) ≠ Φ).
+         { split; try (red; intros; apply AxiomII in H7; tauto). 
+            intro; generalize (Lemma114 _ H0); intro; unfold Section in H8; destruct H8.
+            apply Property_Φ in H8; apply H8 in H7; rewrite <- H7 in H3; contradiction. }
+         apply H6 in H7; destruct H7 as [y H7].
+         assert (((En_f' g) ∪ [[y,g[En_f' g]]]) ⊂ (En_f' g)).
+         { unfold Included; intros; apply AxiomII in H8; destruct H8, H9; auto.
+            assert (Ensemble ([y, g [En_f' g]])).
+            { unfold FirstMember in H7; destruct H7; AssE y.
+               apply Theorem69 in H4; apply Theorem19 in H4; apply Theorem49; tauto. }
+        apply AxiomII in H9; destruct H9; rewrite H11; try apply Theorem19; auto.
+        apply AxiomII_P; split; auto.
+        split.
+        - unfold FirstMember in H7; destruct H7; apply AxiomII in H7; tauto.
+        - exists ((En_f' g) ∪ [[y,g[En_f' g]]]).
+          assert (Function (En_f' g ∪ [[y, g [En_f' g]]])).
+          { unfold Function; split; intros.
+             - unfold Relation; intros; apply AxiomII in H12; destruct H12, H13.
+              * PP H13 a b; eauto.
+              * apply AxiomII in H13; destruct H13; apply Theorem19 in H10; apply H14 in H10; eauto.
+             - destruct H12; apply AxiomII in H12; destruct H12 as [_ H12].
+                apply AxiomII in H13; destruct H13 as [_ H13]; unfold FirstMember in H7; destruct H7.
+                apply AxiomII in H7; destruct H7 as [_ [_ H7]]; apply AxiomII in H7; destruct H7.
+                destruct H12, H13.
+                -- eapply H; eauto.
+                -- apply AxiomII in H13; destruct H13; apply Theorem19 in H10; apply H16 in H10.
+                    apply Theorem55 in H10; destruct H10; try apply Theorem49; auto.
+                    rewrite H10 in H12; apply Property_dom in H12; contradiction.
+                -- apply AxiomII in H12; destruct H12; apply Theorem19 in H10; apply H16 in H10.
+                    apply Theorem55 in H10; destruct H10; try apply Theorem49; auto.
+                    rewrite H10 in H13; apply Property_dom in H13; contradiction.
+                -- double H12; apply AxiomII in H12; apply AxiomII in H13; destruct H12, H13; double H10.
+                    apply Theorem19 in H10; apply H17 in H10; apply Theorem19 in H19; apply H18 in H19.
+                    apply Theorem55 in H10; destruct H10; apply Theorem49 in H12; auto.
+                    apply Theorem55 in H19; destruct H19; apply Theorem49 in H13; auto.
+                    rewrite H20, H21; auto. }
+  split; auto; split.
+  + apply Theorem114; unfold Section; intros.
+     split.
+     * unfold Included; intros.
+        apply AxiomII in H13; destruct H13, H14; apply AxiomII in H14; destruct H14, H15.
+        -- apply Property_dom in H15; apply AxiomII; split; Ens; eapply Theorem111; eauto.
+        -- apply AxiomII in H15; destruct H15; apply Theorem19 in H10; apply H16 in H10.
+            apply Theorem55 in H10; destruct H10; try apply Theorem49; auto.
+            unfold FirstMember in H7; destruct H7; apply AxiomII in H7; rewrite H10; tauto.
+     * split; try (apply Theorem107; apply Theorem113); intros.
+        destruct H13, H14.
+        apply AxiomII in H14; destruct H14, H16; apply AxiomII in H16; destruct H16, H17.
+        -- apply AxiomII; split; Ens.
+            assert ([u, (En_f' g) [u]] ∈ (En_f' g)).
+            { apply Property_Value; auto; apply Property_dom in H17.
+               unfold Rrelation in H15; apply AxiomII_P in H15; destruct H15.
+               eapply Lemma128; eauto. }
+        exists ((En_f' g) [u]); apply AxiomII; split; Ens.
+        -- assert ([u, (En_f' g) [u]] ∈ (En_f' g)).
+            { apply Property_Value; auto; apply AxiomII in H17; destruct H17.
+               apply Theorem19 in H10; apply H18 in H10.
+              apply Theorem55 in H10; destruct H10; try apply Theorem49; auto; subst v.
+            unfold FirstMember in H7; destruct H7.
+            generalize (classic (u ∈ dom( En_f' g))); intro; destruct H20; auto.
+            absurd (Rrelation u E y); auto; try apply H10.
+            apply AxiomII; repeat split; Ens; apply AxiomII; split; Ens. }
+            apply AxiomII; split; Ens; exists ((En_f' g) [u]); apply AxiomII; split; Ens.
+  + split; intros.
+     * apply Property_Value in H13; auto; apply AxiomII in H13; destruct H13, H14.
+        -- apply AxiomII_P in H14; destruct H14, H15; destruct H16 as [h [H16 [H17 [H18 H19]]]].
+            double H19; apply Property_dom in H20; rewrite Theorem70 in H19; auto.
+            apply AxiomII_P in H19; destruct H19.
+           assert (h ⊂ En_f' g).
+          { unfold Included; intros; PP' H23; apply AxiomII_P.
+             split; try Ens; double H22.
+             apply Property_dom in H22; split; try apply AxiomII.
+             - split; try Ens; eapply Theorem111; eauto.
+             - exists h; tauto. }
+       assert ((En_f' g ∪ [[y, g [En_f' g]]]) | (z0) = En_f' g | (z0)).
+       { unfold Restriction; rewrite Theorem6'; rewrite Theorem8.
+          assert ((z0) × μ ∩ [[y, g [En_f' g]]] = Φ).
+          { apply AxiomI; split; intros; apply AxiomII in H23; destruct H23, H24; auto.
+             PP H24 a b; apply AxiomII_P in H26; destruct H26, H27.
+             apply AxiomII in H25; destruct H25.
+             apply Theorem19 in H10; apply H29 in H10.
+             apply Theorem55 in H10; apply Theorem49 in H25; auto; destruct H10.
+             rewrite H10 in H27.
+             assert (y ∈ dom( h)). { eapply Lemma128; eauto. }
+             apply Property_Value in H31; auto; apply H22 in H31; apply Property_dom in H31.
+             unfold FirstMember in H7; destruct H7; apply AxiomII in H7; destruct H7, H33.
+             apply AxiomII in H34; destruct H34; contradiction. }
+       rewrite H23; rewrite Theorem6; rewrite Theorem17; apply Theorem6'. }
+       rewrite H21; rewrite H23.
+       assert (h | (z0) = En_f' g | (z0)).
+        { apply AxiomI; split; intros.
+           - apply AxiomII in H24; destruct H24, H25; apply AxiomII; repeat split; auto.
+           - apply AxiomII in H24; destruct H24, H25.
+             apply AxiomII; repeat split; auto; rewrite Theorem70; auto.
+             PP H26 a b; apply AxiomII_P in H27.
+             apply AxiomII_P; split; auto; destruct H27 as [_ [H27 _]].
+             assert (a ∈ dom(h)). { eapply Lemma128; eauto. }
+           apply Property_Value in H28; auto; apply H22 in H28.
+           eapply H; eauto. }
+           rewrite <- H24; auto. 
+        -- apply AxiomII in H14; destruct H14.
+            double H10; apply Theorem19 in H10; apply H15 in H10.
+            apply Theorem55 in H10; apply Theorem49 in H13; auto; destruct H10; subst z0.
+            rewrite H17.
+           assert ((En_f' g ∪ [[y, g [En_f' g]]]) | (y) = En_f' g | (y)).
+           { apply AxiomI; split; intros.
+              - apply AxiomII in H10; destruct H10, H18.
+                apply AxiomII in H18; destruct H18, H20.
+                * apply AxiomII; tauto.
+                * PP H19 a b; apply AxiomII_P in H21; destruct H21, H22.
+                  apply AxiomII in H20; destruct H20; apply Theorem19 in H16; apply H24 in H16.
+                  apply Theorem55 in H16; apply Theorem49 in H21; auto; destruct H16.
+                  rewrite H16 in H22.
+                  generalize (Theorem101 y); intro; contradiction. 
+              - unfold Restriction; rewrite Theorem6'; rewrite Theorem8.
+                apply AxiomII; split; Ens; left; rewrite Theorem6'; auto. }
+           rewrite H10; unfold FirstMember in H7; destruct H7.
+           apply AxiomII in H7; destruct H7, H19; apply AxiomII in H20; destruct H20.
+           rewrite Lemma128'; auto. 
+        * apply AxiomII; split; Ens; right; apply AxiomII; split; Ens; auto. }
+    unfold FirstMember in H7; destruct H7.
+    assert (y ∈ dom(En_f' g ∪ [[y, g [En_f' g]]])).
+    {  apply AxiomII; split; Ens; exists g [En_f' g].
+        assert (Ensemble ([y, g [En_f' g]])).
+        { apply Theorem49; split; Ens; apply Theorem69 in H4; apply Theorem19; auto. }
+        apply AxiomII; split; Ens.
+        right; apply AxiomII; auto. }
+    apply AxiomII in H7; destruct H7, H11; apply AxiomII in H12; destruct H12.
+    elim H13; apply AxiomII in H10; destruct H10, H14.
+    apply H8 in H14; apply Property_dom in H14; auto.
+    + apply Theorem69 in H4; rewrite H2, H4; auto.
+Qed.
+
+Hint Resolve Theorem128 : set.
+
+
+(* 无限性公理 VIII *)
+
+Axiom AxiomVIII : exists y, Ensemble y /\ Φ ∈ y
+  /\ (forall x, x ∈ y -> (x ∪ [x]) ∈ y).
+
+Hint Resolve AxiomVIII : set.
+
+
 (* 定义129 *)
 
-Definition Integer x : Prop := Ordinal x /\ WellOrder (E ⁻¹) x.
+Definition Integer x : Prop := Ordinal x /\ KWellOrder (E ⁻¹) x.
 
 Hint Unfold Integer : set.
 
@@ -1679,6 +2142,199 @@ Definition W : Class := \{ λ x, Integer x \}.
 
 Hint Unfold W : set.
 
+
+(* A.10 选择公理 *)
+
+(* 定义139 *)
+
+Definition ChoiceFunction c : Prop :=
+  Function c /\ (forall x, x ∈ dom(c) -> c[x] ∈ x).
+
+Hint Unfold ChoiceFunction : set.
+
+
+(* 选择公理 IX *)
+
+Axiom AxiomIX : exists c, ChoiceFunction c /\ dom(c) = μ ~ [Φ].
+
+Hint Resolve AxiomIX : set.
+
+
+(* 定理140 *)
+
+Lemma Ex_Lemma140 : forall x c,
+  Ensemble x -> ChoiceFunction c ->
+  (exists g, forall h, Ensemble h -> g[h] = c[x ~ ran(h)]).
+Proof.
+  intros.
+  unfold ChoiceFunction in H0; destruct H0.
+  exists (\{\ λ u v, v = c [x ~ ran(u)] \}\); intros.
+  apply AxiomI; split; intros.
+  - apply AxiomII; split; Ens; intros.
+    apply AxiomII in H3; destruct H3.
+    apply H5; clear H5; apply AxiomII; split; Ens.
+    apply AxiomII_P; split; try apply Theorem49; Ens.
+    apply AxiomII in H4; destruct H4.
+    rewrite Theorem70 in H5; auto.
+    apply AxiomII_P in H5; apply H5.
+  - apply AxiomII; split; Ens; intros.
+    apply AxiomII in H4; destruct H4.
+    apply AxiomII_P in H5; destruct H5.
+    rewrite H6; auto.
+Qed.
+
+(** definition95 **)
+
+Lemma Property_F11 : forall f,
+  dom(f⁻¹) = ran(f) /\ ran(f⁻¹) = dom(f).
+Proof.
+  intros; unfold Domain, Range; split.
+  - apply AxiomI; split; intros.
+    + apply AxiomII in H; destruct H, H0; apply AxiomII_P in H0.
+      destruct H0; apply AxiomII; split; Ens.
+    + apply AxiomII in H; destruct H, H0; apply AxiomII; split; auto.
+      exists x; apply AxiomII_P; split; auto; apply Theorem49.
+      AssE [x,z]; apply Theorem49 in H1; destruct H1; auto.
+  - apply AxiomI; split; intros.
+    + apply AxiomII in H; destruct H, H0; apply AxiomII_P in H0.
+      destruct H0; apply AxiomII; split; Ens.
+    + apply AxiomII in H; destruct H, H0; apply AxiomII; split; auto.
+      exists x; apply AxiomII_P; split; auto; apply Theorem49.
+      AssE [z,x]; apply Theorem49 in H1; destruct H1; auto.
+Qed.
+
+Lemma Lemma140 : forall f g y,
+  y ∈ dom(f) -> f [y] = g [f|(y)] -> Ensemble (f|(y)).
+Proof.
+  intros.
+  generalize (classic ((f|(y)) ∈ dom(g))); intros; destruct H1; Ens.
+  apply Theorem69 in H1; rewrite H1 in H0; clear H1.
+  apply Theorem69 in H; rewrite H0 in *.
+  generalize (Theorem101 μ); intros; contradiction.
+Qed.
+
+Theorem Theorem140 : forall x,
+  Ensemble x -> exists f, Function1_1 f /\ ran(f) = x /\ Ordinal_Number dom(f).
+Proof.
+  intros.
+  generalize AxiomIX; intros; destruct H0 as [c H0], H0.
+  double H0; apply (Ex_Lemma140 x _) in H2; auto; destruct H2 as [g H2].
+  generalize (Theorem128 g); intros; destruct H3 as [f H3], H3, H4.
+  unfold ChoiceFunction in H0; destruct H0; exists f.
+  assert (Function1_1 f).
+  { unfold Function1_1; split; auto.
+    unfold Function; split; intros.
+    - unfold Relation; intros; PP H7 a b; Ens.
+    - unfold Inverse in H7; destruct H7.
+      apply AxiomII_P in H7; apply AxiomII_P in H8; destruct H7, H8.
+      clear H7 H8; double H9; apply Property_dom in H8.
+      double H10; apply Property_dom in H10.
+      generalize (classic (y = z)); intros; destruct H11; auto.
+      assert (Ordinal y /\ Ordinal z).
+      { split; apply (Theorem111 dom(f) _); auto. }
+      elim H12; intros; apply Theorem110 in H12.
+      assert (Ordinal_Number y /\ Ordinal_Number z).
+      { unfold Ordinal_Number, R; split; apply AxiomII; Ens. }
+      clear H13 H14; destruct H15; apply H5 in H13; apply H5 in H14.
+      rewrite H2 in H13, H14; try apply (Lemma140 _ g _); auto.
+      clear H2 H5; apply Property_Value in H8; auto.
+      apply Property_Value in H10; auto.
+      unfold Function in H3; destruct H3.
+      add ([y,f[y]] ∈ f) H7; add ([z,f[z]] ∈ f) H9.
+      apply H3 in H7; apply H3 in H9; rewrite H9 in H7; clear H9.
+      double H8; double H10; apply Property_ran in H8.
+      apply Property_ran in H10; destruct H12.
+      + assert (f[z] ∈ ran(f|(z))).
+        { rewrite H7; unfold Range; apply AxiomII; split; Ens.
+          exists y; unfold Restriction; apply Theorem4'; split; auto.
+          unfold Cartesian; apply AxiomII_P; split; Ens.
+          split; auto; apply Theorem19; Ens. }
+        assert ((x ~ ran(f|(z))) ∈ dom(c)).
+        { generalize (classic ((x ~ ran(f|(z))) ∈ dom(c))); intros.
+          destruct H16; auto; apply Theorem69 in H16; auto.
+          rewrite H16 in H14; rewrite H14 in H10; AssE μ.
+          generalize Theorem39; intros; contradiction. }
+        apply H6 in H16; unfold Setminus at 2 in H16.
+        rewrite <- H14 in H16; apply Theorem4' in H16; destruct H16.
+        unfold Complement in H17; apply AxiomII in H17; destruct H17.
+        unfold NotIn in H18; contradiction.
+      + destruct H12; try contradiction.
+        assert (f[y] ∈ ran(f|(y))).
+        { rewrite <- H7; unfold Range; apply AxiomII; split; Ens.
+          exists z; unfold Restriction; apply Theorem4'; split; auto.
+          unfold Cartesian; apply AxiomII_P; split; Ens.
+          split; auto; apply Theorem19; Ens. }
+        assert ((x ~ ran(f|(y))) ∈ dom(c)).
+        { generalize (classic ((x ~ ran(f|(y))) ∈ dom(c))); intros.
+          destruct H16; auto; apply Theorem69 in H16; auto.
+          rewrite H16 in H13; rewrite H13 in H8; AssE μ.
+          generalize Theorem39; intros; contradiction. }
+        apply H6 in H16; unfold Setminus at 2 in H16.
+        rewrite <- H13 in H16; apply Theorem4' in H16; destruct H16.
+        unfold Complement in H17; apply AxiomII in H17; destruct H17.
+        unfold NotIn in H18; contradiction. }
+  split; auto; assert (ran(f) ⊂ x).
+  { unfold Included; intros; unfold Range in H8; apply AxiomII in H8.
+    destruct H8, H9; double H9; apply Property_dom in H10.
+    assert (Ordinal_Number x0).
+    { unfold Ordinal_Number, R; apply AxiomII; split; Ens.
+      apply (Theorem111 dom(f) _); split; auto. }
+    apply H5 in H11; rewrite H2 in H11; try apply (Lemma140 _ g _); auto.
+    apply Property_Value in H10; auto; destruct H3.
+    add ([x0,f[x0]]∈f) H9; apply H12 in H9; rewrite <- H9 in H11.
+    assert ((x ~ ran(f|(x0))) ∈ dom(c)).
+    { generalize (classic ((x ~ ran(f|(x0))) ∈ dom(c))); intros.
+      destruct H13; auto; apply Theorem69 in H13; auto.
+      rewrite H13 in H11; rewrite H11 in H9; rewrite <- H9 in H10.
+      clear H9 H11 H13; apply Property_ran in H10; AssE μ.
+      generalize Theorem39; intros; contradiction. }
+    apply H6 in H13; rewrite <- H11 in H13.
+    unfold Setminus in H13; apply Theorem4' in H13; apply H13. }
+  assert (Ensemble dom(f)).
+  { unfold Function1_1 in H7; destruct H7 as [H9 H7]; clear H9.
+    generalize (Property_F11 f); intros; destruct H9; rewrite <- H9 in H8.
+    rewrite <- H10; apply AxiomV; apply Theorem33 in H8; auto. }
+  assert (Ordinal_Number dom(f)).
+  { unfold Ordinal_Number; apply AxiomII; split; auto. }
+  split; auto; apply H5 in H10.
+  assert (f|(dom(f)) = f).
+  { unfold Restriction; apply AxiomI; split; intros.
+    - apply AxiomII in H11; apply H11.
+    - apply AxiomII; repeat split; Ens.
+      PP' H12; apply AxiomII_P; repeat split; Ens.
+      + apply Property_dom in H11; auto.
+      + apply Property_ran in H11; apply Theorem19; Ens. }
+  rewrite H11 in *; clear H11.
+  rewrite H2 in H10; try apply Theorem75; auto.
+  generalize (Theorem101 dom(f)); intros.
+  apply Theorem69 in H11; auto; rewrite H10 in H11.
+  generalize (classic ((x ~ ran(f)) ∈ dom(c))); intros; destruct H12.
+  - apply Theorem69 in H12; auto; rewrite H11 in H12.
+    generalize (Theorem101 μ); intros; contradiction.
+  - rewrite H1 in H12; unfold Setminus at 2 in H12.
+    assert ((x ~ ran(f)) ∈ (μ ∩ ¬[Φ]) <-> (x ~ ran(f)) ∈ μ /\
+            (x ~ ran(f)) ∈ ¬[Φ]).
+    { split; intros; try apply Theorem4'; auto. }
+    apply definition_not in H13; auto; clear H12.
+    assert (Ensemble (x ~ ran(f))).
+    { apply (Theorem33 x _); auto; unfold Included.
+      intros; apply AxiomII in H12; apply H12. }
+    apply not_and_or in H13; destruct H13.
+    + elim H13; apply Theorem19; auto.
+    + assert ((x ~ ran(f)) ∈ ¬[Φ] <-> Ensemble (x ~ ran(f)) /\
+              (x ~ ran(f)) ∉ [Φ]).
+      { split; intros; try apply AxiomII; auto.
+        apply AxiomII in H14; apply H14. }
+      apply definition_not in H14; auto; clear H13.
+      apply not_and_or in H14; destruct H14; try contradiction.
+      unfold NotIn in H13; apply NNPP in H13.
+      unfold Singleton in H13; apply AxiomII in H13; destruct H13.
+      generalize AxiomVIII; intros; destruct H15, H15, H16.
+      AssE Φ; clear H15 H16 H17; apply Theorem19 in H18.
+      apply H14 in H18; symmetry; apply -> Property_Φ in H18; auto.
+Qed.
+
+Hint Resolve Theorem140 : set.
 
 (* A.11 基数 *)
 
@@ -1691,6 +2347,44 @@ Definition Equivalent x y : Prop :=
 Notation "x ≈ y" := (Equivalent x y) (at level 70).
 
 Hint Unfold Equivalent : set.
+
+
+(* 定理145 x≈x *)
+
+Theorem Theorem145 : forall x, x ≈ x.
+Proof.
+  intros.
+  unfold Equivalent.
+  exists (\{\ λ u v, u ∈ x /\ u = v \}\); split.
+  - unfold Function1_1; split.
+    + unfold Function; split; intros.
+      * unfold Relation; intros; PP H a b; Ens.
+      * destruct H; apply AxiomII_P in H.
+        apply AxiomII_P in H0; destruct H, H0, H1, H2.
+        rewrite <- H3, <- H4; auto.
+    + unfold Function; split; intros.
+      * unfold Relation; intros; PP H a b; Ens.
+      * unfold Inverse in H; destruct H; apply AxiomII_P in H.
+        apply AxiomII_P in H0; destruct H, H0.
+        apply AxiomII_P in H1; apply AxiomII_P in H2.
+        destruct H1, H2, H3, H4; rewrite H5, H6; auto.
+   - split.
+     + apply AxiomI; split; intros.
+       * unfold Domain in H; apply AxiomII in H; destruct H, H0.
+         apply AxiomII_P in H0; apply H0.
+       * unfold Domain; apply AxiomII; split; Ens.
+         exists z; apply AxiomII_P; repeat split; auto.
+         apply Theorem49; split; Ens.
+     + apply AxiomI; split; intros.
+       * unfold Range in H; apply AxiomII in H; destruct H, H0.
+         apply AxiomII_P in H0; destruct H0, H1.
+         rewrite H2 in H1; auto.
+       * unfold Range; apply AxiomII; split; Ens.
+         exists z; apply AxiomII_P; repeat split; auto.
+         apply Theorem49; split; Ens.
+Qed.
+
+Hint Resolve Theorem145 : set.
 
 
 (* 定理146 如果x≈y，则y≈x *)
@@ -1801,15 +2495,15 @@ Hint Resolve Theorem147 : set.
 
 (* 定义148 x是一个基数就是说x是一个序数，并且如果y∈R和y≺x，则x≈y不真 *)
 
-Definition Cardinal x : Prop :=
-  Ordinal x /\ (forall y, y∈R -> y ≺ x -> ~ (x ≈ y)).
+Definition Cardinal_Number x : Prop :=
+  Ordinal_Number x /\ (forall y, y∈R -> y ≺ x -> ~ (x ≈ y)).
 
-Hint Unfold Cardinal : set.
+Hint Unfold Cardinal_Number : set.
 
 
-(* 定义149 C={x:x是基数} *)
+(* 定义149 C = { x : x 是基数 } *)
 
-Definition C : Class := \{ λ x, Cardinal x \}.
+Definition C : Class := \{ λ x, Cardinal_Number x \}.
 
 Hint Unfold C : set.
 
@@ -1832,25 +2526,28 @@ Proof.
     apply (Theorem147 _ _ z) in H1; auto; clear H H0 H2.
     unfold C in H3, H4; apply AxiomII in H3; destruct H3.
     apply AxiomII in H4; destruct H4.
-    unfold Cardinal in H0, H3; destruct H0, H3.
-    assert (Ordinal y /\ Ordinal z). { split; auto. }
+    unfold Cardinal_Number in H0, H3; destruct H0, H3.
+    unfold Ordinal_Number in H0, H3.
+    assert (Ordinal y /\ Ordinal z).
+    { unfold R in H0, H3; apply AxiomII in H0.
+      apply AxiomII in H3; destruct H0, H3; split; auto. }
     apply Theorem110 in H6; destruct H6.
-    + apply Theorem146 in H1. (* apply H5 in H0; auto; try contradiction.
+    + apply Theorem146 in H1; apply H5 in H0; auto; try contradiction.
     + destruct H6; auto; apply H4 in H3; auto; try contradiction.
   - apply AxiomI; split; intros; try apply Theorem19; Ens.
     apply Theorem19 in H; double H; apply Theorem140 in H0.
     destruct H0 as [f H0], H0, H1; apply AxiomII; split; auto.
-    assert (WellOrder E \{ λ x, x ≈ z /\ Ordinal x \}).
+    assert (KWellOrder E \{ λ x, x ≈ z /\ Ordinal x \}).
     { assert (\{ λ x, x ≈ z /\ Ordinal x \} ⊂ R).
       { unfold Included; intros; apply AxiomII in H3.
         destruct H3, H4; apply AxiomII; split; auto. }
       apply (Lemma97 _ E _) in H3; auto.
       apply Theorem107; apply Theorem113. }
-    unfold WellOrder in H3; destruct H3 as [H4 H3]; clear H4.
+    unfold KWellOrder in H3; destruct H3 as [H4 H3]; clear H4.
     assert (\{ λ x, x ≈ z /\ Ordinal x \} ⊂ \{ λ x, x ≈ z /\ Ordinal x \}
             /\ \{ λ x, x ≈ z /\ Ordinal x \} ≠ Φ).
     { split; try unfold Included; auto.
-      apply Lemma35; exists dom(f); apply AxiomII.
+      apply Property_NotEmpty; exists dom(f); apply AxiomII.
       unfold Ordinal_Number, R in H2; apply AxiomII in H2; destruct H2.
       split; auto; split; auto; unfold Equivalent; exists f; auto. }
     apply H3 in H4; destruct H4; unfold FirstMember in H4; destruct H4.
@@ -1873,10 +2570,11 @@ Proof.
       apply AxiomII_P in H0; apply H0.
     + apply AxiomII; split; Ens; exists z; apply AxiomII_P.
       repeat split; try apply Theorem49; Ens.
-      apply Theorem145. *)
-Admitted.
+      apply Theorem145.
+Qed.
 
 Hint Resolve Theorem152 : set.
+
 
 (* 定理153 如果x是一个集，则P[x]≈x *)
 
@@ -1903,7 +2601,7 @@ Hint Unfold Finite : set.
 (* 定理167 x是有限的当且仅当存在r使得r良序x，并且r⁻¹也良序x *)
 
 Theorem Theorem167 : forall (x: Class),
-  Finite x <-> exists r, WellOrder r x /\ WellOrder (r⁻¹) x.
+  Finite x <-> exists r, KWellOrder r x /\ KWellOrder (r⁻¹) x.
 Admitted.
 
 Hint Resolve Theorem167 : set.
@@ -1924,13 +2622,13 @@ Proof.
   intros.
   apply Theorem167 in H; destruct H as [r H], H.
   apply Theorem167; exists r; split.
-  - unfold WellOrder, Connect in H; destruct H.
-    unfold WellOrder, Connect; split; intros.
+  - unfold KWellOrder, Connect in H; destruct H.
+    unfold KWellOrder, Connect; split; intros.
     + destruct H3; apply H; auto.
     + destruct H3; apply H2; split; auto.
       add (B ⊂ A) H3; apply Theorem28 in H3; auto.
-  - unfold WellOrder, Connect in H1; destruct H1.
-    unfold WellOrder, Connect; split; intros.
+  - unfold KWellOrder, Connect in H1; destruct H1.
+    unfold KWellOrder, Connect; split; intros.
     + destruct H3; apply H1; auto.
     + destruct H3; apply H2; split; auto.
       add (B ⊂ A) H3; apply Theorem28 in H3; auto.
@@ -1941,7 +2639,7 @@ Lemma Finite_Single : forall z, Ensemble z -> Finite ([z]).
 Proof.
   intros.
   apply Theorem167; exists E; split.
-  - unfold WellOrder; split; intros.
+  - unfold KWellOrder; split; intros.
     + unfold Connect; intros; destruct H0.
       unfold Singleton in H0, H1.
       apply AxiomII in H0; apply AxiomII in H1.
@@ -1961,7 +2659,7 @@ Proof.
       intro; unfold Rrelation in H6; unfold E in H6.
       apply AxiomII_P in H6; destruct H6.
       generalize (Theorem101 y0); intros; contradiction.
-  - unfold WellOrder; split; intros.
+  - unfold KWellOrder; split; intros.
     + unfold Connect; intros; destruct H0.
       unfold Singleton in H0, H1.
       apply AxiomII in H0; apply AxiomII in H1.
