@@ -1,4 +1,7 @@
-(* This document only provides the definition and theorem that we needed in the Axiom_of_Choice.v, and the complete Coq proof of Kelley axiomatic set theory can contact with stycyj@bupt.edu.cn. *)
+(* This document only provides the definition and theorem that we needed in the
+   paper "Formalization of the Axiom of Choice and its Equivalent Theorems",
+   and the complete Coq proof of Kelley axiomatic set theory can contact with
+   stycyj@bupt.edu.cn. *)
 
 Require Export Logic_Property.
 
