@@ -1,4 +1,4 @@
-Require Export Basic_Definitions. 
+Require Export Basic_Definitions.
 
 
 (** Axiom of Choice **)
