@@ -9,7 +9,7 @@ Module BasicDefinition.
 
 Definition Nest f : Prop := forall A B, A∈f /\ B∈f -> A⊂B \/ B⊂A.
 
-Hint Unfold Nest : Axiom_of_Chioce.
+Hint Unfold Nest : Axiom_of_Choice.
 
 
 (* Finite Characteristic Set *)
@@ -18,7 +18,7 @@ Definition FiniteSet f : Prop :=
   Ensemble f /\ (forall F, F∈f -> (forall z, z ⊂ F /\ Finite z -> z∈f))
   /\ (forall F, Ensemble F /\ (forall z, z ⊂ F /\ Finite z -> z∈f) -> F∈f).
 
-Hint Unfold FiniteSet : Axiom_of_Chioce.
+Hint Unfold FiniteSet : Axiom_of_Choice.
 
 
 (* Property of Finite Characteristic Set *)
@@ -192,7 +192,7 @@ Definition PartialOrder le X : Prop :=
 
 Definition PartialOrderSet X le := PartialOrder le X.
 
-Hint Unfold PartialOrder PartialOrderSet: Axiom_of_Chioce.
+Hint Unfold PartialOrder PartialOrderSet: Axiom_of_Choice.
 
 
 (* Upper Bound, Lower Bound *)
@@ -205,7 +205,7 @@ Definition BoundD x A X le : Prop :=
   PartialOrder le X /\ X ≠ Φ ->
   x∈X /\ A⊂X /\ (forall a, a∈A -> Rrelation x le a).
 
-Hint Unfold BoundU BoundD : Axiom_of_Chioce.
+Hint Unfold BoundU BoundD : Axiom_of_Choice.
 
 
 (* Maximal Element : We say that x∈X is a maximal element if *)
@@ -218,7 +218,7 @@ Definition MaxElement x X le : Prop :=
 Definition MinElement x X le : Prop :=
   X ≠ Φ -> x∈X /\ (forall y, y∈X -> ~ (Rrelation y le x /\ x ≠ y)).
 
-Hint Unfold MaxElement MinElement : Axiom_of_Chioce.
+Hint Unfold MaxElement MinElement : Axiom_of_Choice.
 
 
 (* Total Order, Totally Ordered Set *)
@@ -229,7 +229,7 @@ Definition TotalOrder le X :=
 
 Definition TotalOrderSet X le := TotalOrder le X.
 
-Hint Unfold TotalOrder TotalOrderSet : Axiom_of_Chioce.
+Hint Unfold TotalOrder TotalOrderSet : Axiom_of_Choice.
 
 
 (* Chain *)
@@ -237,7 +237,7 @@ Hint Unfold TotalOrder TotalOrderSet : Axiom_of_Chioce.
 Definition Chain A X le : Prop :=
   PartialOrder le X -> (A ⊂ X /\ A ≠ Φ) /\ TotalOrder (le ∩ (A × A)) A.
 
-Hint Unfold Chain : Axiom_of_Chioce.
+Hint Unfold Chain : Axiom_of_Choice.
 
 
 (* Well Order Set *)
@@ -247,7 +247,7 @@ Definition WellOrder le X :=
 
 Definition WellOrderSet X le := WellOrder le X.
 
-Hint Unfold WellOrderSet : Axiom_of_Chioce.
+Hint Unfold WellOrderSet : Axiom_of_Choice.
 
 
 (* Initial_Segment *)
@@ -255,7 +255,7 @@ Hint Unfold WellOrderSet : Axiom_of_Chioce.
 Definition Initial_Segment Y X le := Y ⊂ X /\ WellOrder le X /\
   (forall u v, (u ∈ X /\ v ∈ Y /\ Rrelation u le v ) -> u ∈ Y).
 
-Hint Unfold WellOrderSet : Axiom_of_Chioce.
+Hint Unfold WellOrderSet : Axiom_of_Choice.
 
 
 End BasicDefinition.
