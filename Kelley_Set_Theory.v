@@ -516,9 +516,9 @@ Proof.
     + generalize (Theorem16 z); intros; contradiction.
 Qed.
 
-Hint Unfold ProperSubset : Axiom_of_Choice.
+Hint Unfold ProperSubset : set.
 Hint Resolve Property_ProperSubset Property_ProperSubset'
-             Property_ProperSubset'' Property_Φ: Axiom_of_Chioce.
+             Property_ProperSubset'' Property_Φ: set.
 
 
 (* III Axiom of subsets : If x is a set there is a set y such that for
