@@ -16,11 +16,15 @@ The axiom of Choice (AC) is an important axiom in axiomatic set theory and it ha
   Proves the Hausdorff maximal principle.
 6. Maximal_Principle.v
   Proves the maximal principle.
-7. Zorn_Lemma.v
+7. Zermelo_Postulate.v
+  Proves Zermelo's postulate according to the maximal principle.
+8. Zorn_Lemma.v
   Proves Zorn's lemma on the basis of the maximal principle.
-8. Wellordering_Theorem.v
+9. Wellordering_Theorem.v
   Proves the well-ordering theorem.
-9. Proof_AC.v
+10. Zermelo_Proof_AC.v
+  Proves AC based on Zermelo's postulate.
+11. WO_Proof_AC.v
   Proves AC based on the well-ordering theorem.
 
 # Author
