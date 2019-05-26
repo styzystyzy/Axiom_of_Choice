@@ -13,13 +13,6 @@ Definition En_FF X A le := \{ λ u, exists a, u = (En_Fs X le a) /\ a∈A \}.
 Axiom Property_FF : forall X A le a,
   (En_Fs X le a) ∈ (En_FF X A le) ->
   (forall b, En_Fs X le a = En_Fs X le b -> a = b).
-(* Proof.
-  intros.
-  unfold En_FF in H; apply Axiom_Scheme in H; destruct H, H1.
-  
-  
-  
-Qed. *)
 
 Definition En_A X A le := \{ λ u, (En_Fs X le u) ∈ A \}.
 

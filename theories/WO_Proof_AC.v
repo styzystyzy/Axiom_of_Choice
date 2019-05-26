@@ -1,4 +1,4 @@
-Require Import Basic_Definitions. 
+Require Import Basic_Definitions.
 
 
 (** The proof of AC **)
