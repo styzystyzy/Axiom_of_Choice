@@ -12,7 +12,7 @@ Axiom Zermelo : forall A, Ensemble A -> Φ ∉ A ->
 Definition En_p X : Class :=
   \{ λ z, exists A, A ∈ (pow(X)~[Φ]) /\ z = (A × [A]) \}.
 
-Theorem Zermelo_AC : forall (X: Class),
+Theorem Proof_Axiom_Choice : forall (X: Class),
   Ensemble X -> exists c, Choice_Function c X.
 Proof.
   intros.
@@ -128,8 +128,6 @@ Proof.
     rewrite H5 in H4; apply Theorem44 in H6; destruct H6 as [H6 _].
     rewrite H6, H7 in H4; rewrite H4; auto.
 Qed.
-
-Hint Resolve Zermelo_AC : Axiom_of_Choice.
 
 End Zermelo_Proof_AC.
 

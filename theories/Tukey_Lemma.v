@@ -26,25 +26,25 @@ Definition En_F' F f := \{ λ x, x ∈ (∪f) /\ (F ∪ [x])∈f \}.
 
 Definition eq_dec (A : Type) := forall x y: A, {x = y} + {x <> y}.
 Parameter beq : eq_dec Class.
-Definition Function_χ (F f ε: Class) : Class :=
+Definition Fun_X (F f ε: Class) : Class :=
   match beq ((En_F' F f) ~ F) Φ with
   | left _ => F
   | right _ => F ∪ [ε[(En_F' F f)~F]]
   end.
 
-Definition tSubset f' f ε : Prop :=
-  f' ⊂ f /\ Φ∈f' /\ (forall F, F∈f' -> (Function_χ F f ε) ∈ f')
+Definition tSubclass f' f ε : Prop :=
+  f' ⊂ f /\ Φ∈f' /\ (forall F, F∈f' -> (Fun_X F f ε) ∈ f')
   /\ (forall φ, φ ⊂ f' /\ Nest φ -> (∪φ) ∈ f').
 
-Definition tSub_f'0 f ε := ∩ \{ λ f', tSubset f' f ε \}.
+Definition En_f'0 f ε := ∩ \{ λ f', tSubclass f' f ε \}.
 
-Definition En_u C f ε := \{ λ A, A ∈ (tSub_f'0 f ε) /\ (A ⊂ C \/ C ⊂ A) \}.
+Definition En_u C f ε := \{ λ A, A ∈ (En_f'0 f ε) /\ (A ⊂ C \/ C ⊂ A) \}.
 
 Definition En_f'1 f ε : Class :=
-  \{ λ C, C ∈ (tSub_f'0 f ε) /\ (En_u C f ε) = (tSub_f'0 f ε) \}.
+  \{ λ C, C ∈ (En_f'0 f ε) /\ (En_u C f ε) = (En_f'0 f ε) \}.
 
-Definition En_ν D f ε : Class :=
-  \{ λ A, A ∈ (tSub_f'0 f ε) /\ (A⊂D \/ (Function_χ D f ε) ⊂ A) \}.
+Definition En_v D f ε : Class :=
+  \{ λ A, A ∈ (En_f'0 f ε) /\ (A⊂D \/ (Fun_X D f ε) ⊂ A) \}.
 
 
 (* Property Proof *)
@@ -66,14 +66,14 @@ Proof.
     + generalize (Theorem16 z); intros; contradiction.
 Qed.
 
-Lemma Property_χ : forall ε F f,
-  Choice_Function ε (∪f) -> F∈f -> F ⊂ (Function_χ F f ε).
+Lemma Property_x : forall ε F f,
+  Choice_Function ε (∪f) -> F∈f -> F ⊂ (Fun_X F f ε).
 Proof.
   intros.
   generalize (classic ((En_F' F f) ~ F = Φ)); intros; destruct H1.
-  - unfold Function_χ; destruct (beq (En_F' F f ~ F) Φ); try tauto.
+  - unfold Fun_X; destruct (beq (En_F' F f ~ F) Φ); try tauto.
     unfold Subclass; intros; auto.
-  - unfold Function_χ; destruct (beq (En_F' F f ~ F) Φ); try tauto.
+  - unfold Fun_X; destruct (beq (En_F' F f ~ F) Φ); try tauto.
     unfold Subclass; intros; apply Theorem4; tauto.
 Qed.
 
@@ -88,20 +88,20 @@ Proof.
 Qed.
 
 Lemma Property_f'0 : forall f ε,
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) -> tSubset (tSub_f'0 f ε) f ε
-  /\ (forall f', f' ⊂ f /\ tSubset f' f ε -> (tSub_f'0 f ε) ⊂ f').
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) -> tSubclass (En_f'0 f ε) f ε
+  /\ (forall f', f' ⊂ f /\ tSubclass f' f ε -> (En_f'0 f ε) ⊂ f').
 Proof.
   intros; double H.
-  apply Property_FinChar in H; unfold Finite_Char in H1; destruct H1, H1.
+  apply Property_FinChar in H; unfold Finite_Character in H1; destruct H1, H1.
   apply Property_NotEmpty in H2; destruct H2 as [F H2]; split.
-  - assert (tSubset f f ε).
-    { unfold tSubset; repeat split; try apply H; intros.
+  - assert (tSubclass f f ε).
+    { unfold tSubclass; repeat split; try apply H; intros.
       - unfold Subclass; intros; auto.
       - generalize (Theorem26 F); intros.
         apply H with (A:=F); split; auto.
       - generalize (classic((En_F' F0 f) ~ F0 = Φ)); intros; destruct H5.
-        + unfold Function_χ; destruct (beq (En_F' F0 f ~ F0) Φ); tauto.
-        + double H5; unfold Function_χ.
+        + unfold Fun_X; destruct (beq (En_F' F0 f ~ F0) Φ); tauto.
+        + double H5; unfold Fun_X.
           destruct (beq (En_F' F0 f ~ F0) Φ); try tauto.
           unfold Choice_Function in H0; destruct H0, H7, H8.
           assert ((En_F' F0 f ~ F0) ∈ dom( ε)).
@@ -121,39 +121,39 @@ Proof.
            apply H9 in H10; unfold Setminus in H10.
            apply Theorem4' in H10; destruct H10.
            unfold En_F' at 2 in H10; apply Axiom_Scheme in H10; apply H10. }
-    assert ((tSub_f'0 f ε) ⊂ f).
-    { unfold tSub_f'0; unfold Subclass; intros.
+    assert ((En_f'0 f ε) ⊂ f).
+    { unfold En_f'0; unfold Subclass; intros.
       unfold Element_I in H5; apply Axiom_Scheme in H5.
       apply H5; apply Axiom_Scheme; split; auto. }
-    unfold tSubset; repeat split; auto.
-    + unfold tSub_f'0; apply Axiom_Scheme; split; intros.
+    unfold tSubclass; repeat split; auto.
+    + unfold En_f'0; apply Axiom_Scheme; split; intros.
       * generalize (Theorem26 f); intros; apply Theorem33 in H6; auto.
-      * apply Axiom_Scheme in H6; destruct H6; unfold tSubset in H7; apply H7.
+      * apply Axiom_Scheme in H6; destruct H6; unfold tSubclass in H7; apply H7.
     + intros; double H6; unfold Subclass in H5.
-      apply H5 in H7; unfold tSubset in H4; apply H4 in H7.
-      unfold tSub_f'0; apply Axiom_Scheme; split; intros; Ens.
+      apply H5 in H7; unfold tSubclass in H4; apply H4 in H7.
+      unfold En_f'0; apply Axiom_Scheme; split; intros; Ens.
       apply Axiom_Scheme in H8; destruct H8.
-      double H9; unfold tSubset in H9; apply H9.
-      unfold tSub_f'0 in H6; apply Axiom_Scheme in H6; destruct H6.
+      double H9; unfold tSubclass in H9; apply H9.
+      unfold En_f'0 in H6; apply Axiom_Scheme in H6; destruct H6.
       apply H11; apply Axiom_Scheme; split; auto.
-    + intros; unfold tSubset in H4; destruct H6; double H6.
-      add ((tSub_f'0 f ε) ⊂ f) H6; apply Theorem28 in H6.
-      add (Nest φ) H6; apply H4 in H6; unfold tSub_f'0; apply Axiom_Scheme.
+    + intros; unfold tSubclass in H4; destruct H6; double H6.
+      add ((En_f'0 f ε) ⊂ f) H6; apply Theorem28 in H6.
+      add (Nest φ) H6; apply H4 in H6; unfold En_f'0; apply Axiom_Scheme.
       split; Ens; intros; apply Axiom_Scheme in H9; destruct H9.
-      unfold tSubset in H10; apply H10; split; auto.
-      assert ((tSub_f'0 f ε) ⊂ y).
-      { unfold Subclass; intros; unfold tSub_f'0 in H11.
+      unfold tSubclass in H10; apply H10; split; auto.
+      assert ((En_f'0 f ε) ⊂ y).
+      { unfold Subclass; intros; unfold En_f'0 in H11.
         unfold Element_I; apply Axiom_Scheme in H11.
         destruct H11; apply H12; apply Axiom_Scheme; split; auto. }
-      add ((tSub_f'0 f ε) ⊂ y) H8; apply Theorem28 in H8; auto.
+      add ((En_f'0 f ε) ⊂ y) H8; apply Theorem28 in H8; auto.
   - intros; destruct H4; unfold Subclass; intros.
-    unfold tSub_f'0 in H6; unfold Element_I in H6.
+    unfold En_f'0 in H6; unfold Element_I in H6.
     apply Axiom_Scheme in H6; destruct H6; apply H7.
     apply Axiom_Scheme; apply Theorem33 in H4; auto.
 Qed.
 
 Lemma FF' : forall (f ε F: Class),
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) -> F∈f ->
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) -> F∈f ->
   (En_F' F f)~F ≠ Φ ->  F = F ∪ [ε[(En_F' F f)~F]] -> False.
 Proof.
   intros.
@@ -170,14 +170,14 @@ Proof.
         unfold En_F' in H8; apply Axiom_Scheme in H8; apply H8. }
       assert (Ensemble (En_F' F f ~ F)).
       { apply Theorem33 in H8; auto; destruct H.
-        unfold Finite_Char in H; destruct H; apply Axiom_Amalgamation; auto. }
+        unfold Finite_Character in H; destruct H; apply Axiom_Amalgamation; auto. }
       unfold Setminus at 2; apply Theorem4'; split.
       - unfold PowerClass; apply Axiom_Scheme; split; auto.
       - unfold Complement; apply Axiom_Scheme; split; auto.
         unfold NotIn; intro; unfold Singleton in H10.
         apply Axiom_Scheme in H10; destruct H10; assert (Φ ∈ μ).
         { apply Theorem19; generalize (Theorem26 (∪ f)); intros.
-          unfold Finite_Char in H; destruct H.
+          unfold Finite_Character in H; destruct H.
           apply Theorem33 in H12; auto; apply Axiom_Amalgamation; apply H. }
         apply H11 in H12; contradiction. }
     apply H0 in H5; unfold Setminus in H5.
@@ -203,28 +203,28 @@ Qed.
 (* Lemma Proof *)
 
 Lemma LemmaT1 : forall f ε,
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) ->
-  (forall D, D ∈ (En_f'1 f ε) -> tSubset (En_ν D f ε) f ε).
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) ->
+  (forall D, D ∈ (En_f'1 f ε) -> tSubclass (En_v D f ε) f ε).
 Proof.
   intros.
   apply (Property_f'0 _ ε) in H; auto; destruct H.
-  assert ((En_ν D f ε) ⊂ f).
-  { unfold En_ν; unfold Subclass; intros.
+  assert ((En_v D f ε) ⊂ f).
+  { unfold En_v; unfold Subclass; intros.
     apply Axiom_Scheme in H3; destruct H3, H4.
-    unfold tSubset in H; destruct H.
+    unfold tSubclass in H; destruct H.
     unfold Subclass in H; apply H in H4; auto. }
-  unfold tSubset; repeat split; auto.
-  - unfold En_ν; apply Axiom_Scheme.
-    unfold tSubset in H; destruct H, H4.
+  unfold tSubclass; repeat split; auto.
+  - unfold En_v; apply Axiom_Scheme.
+    unfold tSubclass in H; destruct H, H4.
     repeat split; Ens; left; apply Theorem26.
   - intro A; intros.
     double H4; unfold Subclass in H3; apply H3 in H4.
-    unfold En_ν in H5; unfold En_ν.
+    unfold En_v in H5; unfold En_v.
     apply Axiom_Scheme; apply Axiom_Scheme in H5; destruct H5, H6.
-    double H6; unfold tSubset in H; apply H in H8.
+    double H6; unfold tSubclass in H; apply H in H8.
     repeat split; Ens; destruct H7.
     + apply Property_ProperSubclass in H7; destruct H7.
-      * left; generalize (classic ((Function_χ A f ε) ⊂ D)); intros.
+      * left; generalize (classic ((Fun_X A f ε) ⊂ D)); intros.
         destruct H9; auto; unfold En_f'1 in H1; apply Axiom_Scheme in H1.
         destruct H1, H10; rewrite <- H11 in H8.
         unfold En_u in H8; apply Axiom_Scheme in H8; destruct H8, H12.
@@ -241,9 +241,9 @@ Proof.
              destruct H14; unfold Subclass in H14.
              apply H14 in H20; contradiction. }
            generalize (classic ((En_F' A f)~A=Φ)); intros; destruct H21.
-           ++ unfold Function_χ in H13; unfold NotIn in H20.
+           ++ unfold Fun_X in H13; unfold NotIn in H20.
               destruct (beq (En_F' A f ~ A) Φ); tauto.
-           ++ unfold Function_χ in H7, H8, H13.
+           ++ unfold Fun_X in H7, H8, H13.
               destruct (beq (En_F' A f ~ A) Φ); try tauto.
               apply Theorem4 in H7; apply Theorem4 in H13.
               destruct H7, H13; try contradiction.
@@ -255,14 +255,14 @@ Proof.
               rewrite <- H24 in H25; contradiction.
       * right; rewrite H7.
         unfold Subclass; intros; auto.
-    + apply (Property_χ ε _ _) in H4; auto.
-      add (A ⊂ Function_χ A f ε) H7; apply Theorem28 in H7; auto.
+    + apply (Property_x ε _ _) in H4; auto.
+      add (A ⊂ Fun_X A f ε) H7; apply Theorem28 in H7; auto.
   - intro ϑ; intros; destruct H4.
-    unfold En_ν; apply Axiom_Scheme.
-    assert ((∪ ϑ) ∈ (tSub_f'0 f ε)).
-    { unfold tSubset in H; apply H; split; auto.
+    unfold En_v; apply Axiom_Scheme.
+    assert ((∪ ϑ) ∈ (En_f'0 f ε)).
+    { unfold tSubclass in H; apply H; split; auto.
       red; intros; unfold Subclass in H4.
-      apply H4 in H6; unfold En_ν in H6.
+      apply H4 in H6; unfold En_v in H6.
       apply Axiom_Scheme in H6; apply H6. }
     repeat split; Ens.
     generalize (classic (forall B, B∈ϑ -> B ⊂ D)).
@@ -274,68 +274,68 @@ Proof.
     + apply not_all_ex_not in H7; destruct H7.
       apply imply_to_and in H7; destruct H7.
       double H7; unfold Subclass in H4; apply H4 in H7.
-      unfold En_ν in H7; apply Axiom_Scheme in H7.
+      unfold En_v in H7; apply Axiom_Scheme in H7.
       destruct H7, H10, H11; try contradiction.
       right; unfold Subclass; intros.
       unfold Element_U; apply Axiom_Scheme; split; Ens.
 Qed.
 
 Lemma LemmaT2 : forall f ε,
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) ->
-  (forall D, D ∈ (En_f'1 f ε) -> (Function_χ D f ε) ∈ (En_f'1 f ε)).
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) ->
+  (forall D, D ∈ (En_f'1 f ε) -> (Fun_X D f ε) ∈ (En_f'1 f ε)).
 Proof.
   intros; double H1.
   unfold En_f'1 in H2; apply Axiom_Scheme in H2.
-  destruct H2, H3; double H3; unfold tSub_f'0 in H5.
+  destruct H2, H3; double H3; unfold En_f'0 in H5.
   double H; apply (Property_f'0 _ ε) in H6; auto.
-  destruct H6; unfold tSubset in H6.
+  destruct H6; unfold tSubclass in H6.
   double H3; apply H6 in H8; double H8.
-  unfold tSub_f'0 in H9; destruct H6.
+  unfold En_f'0 in H9; destruct H6.
   unfold Subclass in H6; apply H6 in H3.
-  apply (Property_χ ε _ _) in H3; auto.
-  assert ((En_ν D f ε) ⊂ (En_u (Function_χ D f ε) f ε)).
-  { unfold En_ν, En_u, Subclass; intros.
+  apply (Property_x ε _ _) in H3; auto.
+  assert ((En_v D f ε) ⊂ (En_u (Fun_X D f ε) f ε)).
+  { unfold En_v, En_u, Subclass; intros.
     apply Axiom_Scheme in H11; apply Axiom_Scheme; destruct H11, H12.
     repeat split; auto; destruct H13; auto. }
-  assert ((En_u (Function_χ D f ε) f ε) ⊂ (tSub_f'0 f ε)).
+  assert ((En_u (Fun_X D f ε) f ε) ⊂ (En_f'0 f ε)).
   { unfold En_u, Subclass; intros.
     apply Axiom_Scheme in H12; apply H12. }
   apply (LemmaT1 f ε) in H1; auto.
-  unfold Finite_Char in H; destruct H, H.
-  assert ((En_ν D f ε) ⊂ f /\ tSubset (En_ν D f ε) f ε).
-  { split; auto; unfold En_ν, Subclass; intros.
+  unfold Finite_Character in H; destruct H, H.
+  assert ((En_v D f ε) ⊂ f /\ tSubclass (En_v D f ε) f ε).
+  { split; auto; unfold En_v, Subclass; intros.
     apply Axiom_Scheme in H15; destruct H15, H16.
     apply H6 in H16; auto. }
-  apply H7 in H15; add ((En_ν D f ε) ⊂ (En_u (Function_χ D f ε) f ε)) H15.
+  apply H7 in H15; add ((En_v D f ε) ⊂ (En_u (Fun_X D f ε) f ε)) H15.
   apply Theorem28 in H15.
-  add ((tSub_f'0 f ε) ⊂ (En_u (Function_χ D f ε) f ε)) H12.
+  add ((En_f'0 f ε) ⊂ (En_u (Fun_X D f ε) f ε)) H12.
   apply Theorem27 in H12; auto.
   unfold En_f'1; apply Axiom_Scheme; repeat split; Ens.
 Qed.
 
 Lemma LemmaT3 : forall f ε,
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) -> Nest (tSub_f'0 f ε).
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) -> Nest (En_f'0 f ε).
 Proof.
   intros; double H.
   apply (Property_f'0 _ ε) in H1; auto; destruct H1.
-  assert ((En_f'1 f ε) ⊂ (tSub_f'0 f ε) /\ Nest (En_f'1 f ε)).
-  { assert ((En_f'1 f ε) ⊂ (tSub_f'0 f ε)).
+  assert ((En_f'1 f ε) ⊂ (En_f'0 f ε) /\ Nest (En_f'1 f ε)).
+  { assert ((En_f'1 f ε) ⊂ (En_f'0 f ε)).
     { unfold Subclass; intros.
       unfold En_f'1 in H3; apply Axiom_Scheme in H3; apply H3. }
-    split; auto; unfold tSubset in H1.
-    add ((tSub_f'0 f ε) ⊂ f) H3; try apply H1.
-    apply Theorem28 in H3; unfold Finite_Char in H; destruct H, H.
+    split; auto; unfold tSubclass in H1.
+    add ((En_f'0 f ε) ⊂ f) H3; try apply H1.
+    apply Theorem28 in H3; unfold Finite_Character in H; destruct H, H.
     apply Theorem33 with (z:=(En_f'1 f ε)) in H; auto.
     unfold Nest; intros; unfold En_f'1 in H6; destruct H6.
     apply Axiom_Scheme in H6; apply Axiom_Scheme in H7.
     destruct H6, H7, H8, H9; rewrite <- H11 in H8.
     unfold En_u in H8; apply Axiom_Scheme in H8; apply H8. }
   destruct H3.
-  assert ((En_f'1 f ε) ⊂ f /\ tSubset (En_f'1 f ε) f ε).
-  { unfold tSubset in H1.
-    add ((tSub_f'0 f ε) ⊂ f) H3; try apply H1.
+  assert ((En_f'1 f ε) ⊂ f /\ tSubclass (En_f'1 f ε) f ε).
+  { unfold tSubclass in H1.
+    add ((En_f'0 f ε) ⊂ f) H3; try apply H1.
     apply Theorem28 in H3; split; auto.
-    unfold tSubset; repeat split; auto; intros.
+    unfold tSubclass; repeat split; auto; intros.
     - unfold En_f'1; apply Axiom_Scheme.
       destruct H1, H5; repeat split; Ens.
       apply Axiom_Extent; split; intros.
@@ -344,8 +344,8 @@ Proof.
         right; apply Theorem26.
     - apply (LemmaT2 _ ε); auto.
     - unfold En_f'1; apply Axiom_Scheme.
-      assert ((∪ φ) ∈ (tSub_f'0 f ε)).
-      { destruct H5; assert (φ ⊂ (tSub_f'0 f ε)).
+      assert ((∪ φ) ∈ (En_f'0 f ε)).
+      { destruct H5; assert (φ ⊂ (En_f'0 f ε)).
         { unfold Subclass; intros.
           unfold Subclass in H5; apply H5 in H7.
           unfold En_f'1; apply Axiom_Scheme in H7; apply H7. }
@@ -368,26 +368,26 @@ Proof.
           destruct H7, H14; destruct H15; try contradiction.
           left; unfold Subclass; intros.
           unfold Element_U; apply Axiom_Scheme; split; Ens. }
-  apply H2 in H5; add ((En_f'1 f ε) ⊂ (tSub_f'0 f ε)) H5.
+  apply H2 in H5; add ((En_f'1 f ε) ⊂ (En_f'0 f ε)) H5.
   apply Theorem27 in H5; auto; rewrite H5; auto.
 Qed.
 
 Lemma LemmaT4 : forall f ε,
-  Finite_Char f /\ f ≠ Φ -> Choice_Function ε (∪f) -> (∪ tSub_f'0 f ε) ∈ f /\
-  (Function_χ (∪ (tSub_f'0 f ε)) f ε) = ∪ (tSub_f'0 f ε).
+  Finite_Character f /\ f ≠ Φ -> Choice_Function ε (∪f) -> (∪ En_f'0 f ε) ∈ f /\
+  (Fun_X (∪ (En_f'0 f ε)) f ε) = ∪ (En_f'0 f ε).
 Proof.
   intros; double H.
   apply (Property_f'0 _ ε) in H1; auto.
-  destruct H1; unfold tSubset in H1.
-  assert ((tSub_f'0 f ε) ⊂ (tSub_f'0 f ε) /\ Nest (tSub_f'0 f ε)).
+  destruct H1; unfold tSubclass in H1.
+  assert ((En_f'0 f ε) ⊂ (En_f'0 f ε) /\ Nest (En_f'0 f ε)).
   { split; try unfold Subclass; auto.
     apply (LemmaT3 _ ε) in H; auto. }
   apply H1 in H3; split.
   - destruct H1; unfold Subclass in H1; apply H1 in H3; auto.
-  - unfold tSub_f'0 at 2 in H3; destruct H1.
+  - unfold En_f'0 at 2 in H3; destruct H1.
     unfold Subclass in H1; double H3; apply H1 in H5.
-    apply (Property_χ ε _ _) in H5; auto.
-    assert ((Function_χ (∪ (tSub_f'0 f ε)) f ε) ⊂ ∪ (tSub_f'0 f ε)).
+    apply (Property_x ε _ _) in H5; auto.
+    assert ((Fun_X (∪ (En_f'0 f ε)) f ε) ⊂ ∪ (En_f'0 f ε)).
     { apply H4 in H3; unfold Subclass; intros.
     unfold Element_U; apply Axiom_Scheme; split; Ens. }
     apply Theorem27; auto.
@@ -397,21 +397,21 @@ Qed.
 (* Tukey's Lemma Proof *)
 
 Theorem Tukey : forall (f: Class),
-  Finite_Char f /\ f ≠ Φ -> exists x, MaxMember x f.
+  Finite_Character f /\ f ≠ Φ -> exists x, MaxMember x f.
 Proof.
   intros; double H.
-  unfold Finite_Char in H0; destruct H0, H0.
+  unfold Finite_Character in H0; destruct H0, H0.
   assert (Ensemble (∪f)). { apply Axiom_Amalgamation in H0; auto. }
   apply AC.Choice_Axiom in H3; destruct H3 as [ε H3].
   assert (exists F, F∈f /\ (En_F' F f) ~ F = Φ).
-  { exists (∪(tSub_f'0 f ε)); double H3.
+  { exists (∪(En_f'0 f ε)); double H3.
     apply (LemmaT4 _ ε) in H4; auto; destruct H4; split; auto.
-    generalize (classic(En_F'(∪ tSub_f'0 f ε)f~(∪ tSub_f'0 f ε)=Φ)).
+    generalize (classic(En_F'(∪ En_f'0 f ε)f~(∪ En_f'0 f ε)=Φ)).
     intros; destruct H6; auto.
-    assert ((Function_χ (∪ (tSub_f'0 f ε)) f ε) = (∪ tSub_f'0 f ε) ∪
-    [ε [En_F' (∪ tSub_f'0 f ε) f ~ (∪ tSub_f'0 f ε)]]).
-    { unfold Function_χ; destruct (beq (En_F' (∪ tSub_f'0 f ε) f ~
-      (∪ tSub_f'0 f ε)) Φ); tauto. }
+    assert ((Fun_X (∪ (En_f'0 f ε)) f ε) = (∪ En_f'0 f ε) ∪
+    [ε [En_F' (∪ En_f'0 f ε) f ~ (∪ En_f'0 f ε)]]).
+    { unfold Fun_X; destruct (beq (En_F' (∪ En_f'0 f ε) f ~
+      (∪ En_f'0 f ε)) Φ); tauto. }
     rewrite H5 in H7; apply FF' in H7; auto; inversion H7. }
   destruct H4 as [F H4]; destruct H4; exists F.
   apply -> Property_Φ in H5; try (apply Property_F'; auto).

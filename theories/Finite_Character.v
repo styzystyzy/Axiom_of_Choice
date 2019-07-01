@@ -1550,21 +1550,21 @@ Hint Unfold Nest : Axiom_of_Choice.
 
 (* Finite Characteristic Set *)
 
-Definition Finite_Char f : Prop :=
+Definition Finite_Character f : Prop :=
   Ensemble f /\ (forall F, F∈f -> (forall z, z ⊂ F /\ Finite z -> z∈f))
   /\ (forall F, Ensemble F /\ (forall z, z ⊂ F /\ Finite z -> z∈f) -> F∈f).
 
-Hint Unfold Finite_Char : Axiom_of_Choice.
+Hint Unfold Finite_Character : Axiom_of_Choice.
 
 
 (* Property of Finite Characteristic Set *)
 
 Proposition Property_FinChar : forall f: Class,
-  Finite_Char f /\ f ≠ Φ -> (forall A B, A ∈ f /\ B ⊂ A -> B ∈ f)
+  Finite_Character f /\ f ≠ Φ -> (forall A B, A ∈ f /\ B ⊂ A -> B ∈ f)
   /\ (forall φ, φ ⊂ f /\ Nest φ -> (∪φ) ∈ f).
 Proof.
   intros; destruct H.
-  unfold Finite_Char in H; destruct H; split; intros.
+  unfold Finite_Character in H; destruct H; split; intros.
   - destruct H2; apply H1; intros; split.
     + apply Theorem33 in H3; Ens.
     + intros; destruct H4; apply H1 with (z:=z) in H2; auto.

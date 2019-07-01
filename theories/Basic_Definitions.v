@@ -5,6 +5,19 @@ Require Export Axiomatic_Set_Theory.
 
 Module BasicDefinition.
 
+(* Choice Function *)
+(* For the independence of the formalization of AC and its related theorems,
+   we redefine the choice function as below and restate AC in Tukey_Lemma.v.
+   The following choice function is more specific and there is no contradiction
+   between the two descriptions of AC. *)
+
+Definition Choice_Function ε X : Prop :=
+  Function ε /\ ran(ε) ⊂ X /\ dom(ε) = pow(X)~[Φ] /\
+  (forall A, A ∈ dom(ε) -> ε[A] ∈ A).
+
+Hint Unfold Choice_Function : Axiom_of_Choice.
+
+
 (* Maximial Member : F is a maximal member of f iff no member of f is properly contained in F. *)
 
 Definition MaxMember F f : Prop :=
@@ -21,16 +34,9 @@ Definition MinMember F f : Prop :=
 Hint Unfold MaxMember MinMember : Axiom_of_Choice.
 
 
-(* Choice Function *)
-
-Definition Choice_Function ε X : Prop :=
-  Function ε /\ ran(ε) ⊂ X /\ dom(ε) = pow(X)~[Φ] /\ 
-  (forall A, A ∈ dom(ε) -> ε[A] ∈ A).
-
-Hint Unfold Choice_Function : Axiom_of_Choice.
-
-
-(** Order **)
+(* Orders of this paper are all limited to a set, the definition of well orders
+  in Axiomatic_Set_Theory.v is more general and doesn't have this limitation. *)
+(* In addition, we add partial orders, total orders. *)
 
 (* Partial Order, Partially Ordered Set *)
 
@@ -58,11 +64,11 @@ Definition BoundU x A X le : Prop :=
   PartialOrder le X /\ X ≠ Φ ->
   x∈X /\ A⊂X /\ (forall a, a∈A -> Rrelation a le x).
 
-Definition BoundD x A X le : Prop :=
+Definition BoundL x A X le : Prop :=
   PartialOrder le X /\ X ≠ Φ ->
   x∈X /\ A⊂X /\ (forall a, a∈A -> Rrelation x le a).
 
-Hint Unfold BoundU BoundD : Axiom_of_Choice.
+Hint Unfold BoundU BoundL : Axiom_of_Choice.
 
 
 (* Maximal Element : We say that x∈X is a maximal element if *)

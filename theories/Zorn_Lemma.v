@@ -34,7 +34,7 @@ Proof.
     apply Axiom_SchemeP in H5; apply H5.
 Qed.
 
-Lemma LemmaZorn_1 : forall A X le,
+Lemma LemmaZ1 : forall A X le,
   PartialOrderSet X le ->
   (Chain A X le <-> (En_FF X A le)⊂(En_FF X X le) /\ Nest(En_FF X A le) /\ A≠Φ).
 Proof.
@@ -135,7 +135,7 @@ Proof.
             apply Theorem49; split; Ens. }
 Qed.
 
-Lemma LemmaZorn_2 : forall A X le y,
+Lemma LemmaZ2 : forall A X le y,
   PartialOrderSet X le /\ X ≠ Φ ->
   (BoundU y A X le -> (forall x, x ∈ (En_FF X A le) -> x ⊂ (En_Fs X le y))).
 Proof.
@@ -151,7 +151,7 @@ Proof.
   apply H13 with (v:=a); repeat split; auto.
 Qed.
 
-Lemma LemmaZorn_3 : forall X le y,
+Lemma LemmaZ3 : forall X le y,
   PartialOrderSet X le /\ X ≠ Φ ->
   (MaxElement y X le <-> MaxMember (En_Fs X le y) (En_FF X X le)).
 Proof.
@@ -223,7 +223,7 @@ Proof.
       apply H3 in H4; clear H3; destruct H4.
       unfold En_FF in H3; apply Axiom_Scheme in H3; destruct H3.
       destruct H5 as [v H5], H5; rewrite H5 in H2; add (X ≠ Φ) H.
-      exists v; apply LemmaZorn_3 with (y:=v) in H; auto; apply H; auto.
+      exists v; apply LemmaZ3 with (y:=v) in H; auto; apply H; auto.
     + intro B; intros; destruct H3.
       generalize (classic (B = Φ)); intros; destruct H5.
       { rewrite H5; apply Property_NotEmpty in H1.
@@ -254,7 +254,7 @@ Proof.
           apply H3 in H7; apply Axiom_Scheme in H7; destruct H7, H8, H8.
           rewrite H8 in H5; apply Property_NotEmpty; exists x0.
           apply Axiom_Scheme; split; Ens. }
-      double H; apply LemmaZorn_1 with (A:= (En_A X B le)) in H7.
+      double H; apply LemmaZ1 with (A:= (En_A X B le)) in H7.
       apply H7 in H6; clear H7; double H6; apply H0 in H6; clear H0.
       destruct H6 as [y H0]; unfold Chain in H7; double H.
       unfold PartialOrderSet in H6; apply H7 in H6; clear H7.
@@ -268,7 +268,7 @@ Proof.
         -- exists y; split; auto.
       * double H8; unfold Subclass in H3; apply H3 in H9.
         apply Axiom_Scheme in H9; destruct H9, H10, H10; add (X≠Φ) H.
-        apply LemmaZorn_2 with (A:=En_A X B le)(y:=y)(x:=u) in H; auto.
+        apply LemmaZ2 with (A:=En_A X B le)(y:=y)(x:=u) in H; auto.
         apply Axiom_Scheme; split; auto; exists x; split; auto.
         apply Axiom_Scheme; split; Ens; rewrite <- H10; auto.
 Qed.

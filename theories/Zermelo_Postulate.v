@@ -143,7 +143,7 @@ Proof.
         generalize (Theorem16 x0); intros; contradiction.
     + intros; exists (∪n); split; intros.
       * apply Property_FinChar in H5; auto; split; auto; clear H6.
-        destruct H5; unfold Finite_Char; repeat split; auto.
+        destruct H5; unfold Finite_Character; repeat split; auto.
         { intros F H7 F1 H8; destruct H8; unfold En_T in H7.
           apply Axiom_Scheme in H7; destruct H7, H10 as [B H10], H10.
           unfold En_T; apply Axiom_Scheme; assert (Ensemble F1).

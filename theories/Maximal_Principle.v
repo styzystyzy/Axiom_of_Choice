@@ -16,7 +16,7 @@ Qed.
 
 Theorem MaxPrinciple : forall (A: Class),
   Ensemble A ->
-  (forall n, n⊂A /\ Nest n -> exists N, N∈A /\ (forall u, u∈n -> u⊂N))  ->
+  (forall n, n⊂A /\ Nest n -> exists N, N∈A /\ (forall u, u∈n -> u⊂N)) ->
   exists M, MaxMember M A.
 Proof.
   intros.

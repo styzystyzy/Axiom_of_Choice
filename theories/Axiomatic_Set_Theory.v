@@ -5,9 +5,9 @@
 
 (* In this work, set theory is divided into two parts. One part is basic set
    theory (Axiomatic_Set_Theory.v), including some basic definitions and
-   theorems of sets, the other part is related to the finite cardinals, 
+   theorems of sets. The other part is related to the finite cardinals, 
    including integers, cardinal numbers and so on. According to the first part,
-   we can independently  prove AC by Zermelo's postulate or the well-ordering
+   we can independently prove AC by Zermelo's postulate or the well-ordering
    theorem. On the basis of the second part, we define the set of finite 
    character and prove some properties of it. *)
 

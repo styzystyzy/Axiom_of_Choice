@@ -12,12 +12,12 @@ Declare Module Tu : Tukey_Lemma.
 Definition En_f1 f A := \{ λ F, F∈f /\ (F ∪ A) ∈ f \}.
 
 Lemma LemmaH1_1 : forall (f A: Class),
-  Finite_Char f -> A∈f -> Finite_Char (En_f1 f A).
+  Finite_Character f -> A∈f -> Finite_Character (En_f1 f A).
 Proof.
   intros.
   assert (f ≠ Φ). { apply Property_NotEmpty; try exists A; auto. }
   double H; add (f ≠ Φ) H2; apply Property_FinChar in H2; destruct H2.
-  unfold Finite_Char in H; destruct H; unfold Finite_Char; repeat split.
+  unfold Finite_Character in H; destruct H; unfold Finite_Character; repeat split.
   - unfold En_f1; assert (\{ λ F,F∈f /\ (F∪A)∈f \} ⊂ f).
     { unfold Subclass; intros; apply Axiom_Scheme in H5; apply H5. }
     apply Theorem33 in H5; auto.
@@ -49,7 +49,7 @@ Proof.
 Qed.
 
 Theorem LemmaH1 : forall (f A: Class),
-  Finite_Char f -> A∈f -> (exists M, MaxMember M f /\ A ⊂ M).
+  Finite_Character f -> A∈f -> (exists M, MaxMember M f /\ A ⊂ M).
 Proof.
   intros; double H.
   assert (A ∈ (En_f1 f A)).
@@ -75,7 +75,7 @@ Proof.
     unfold Subclass; intros; apply Theorem4; auto.
   - apply NNPP in H5; assert (A ⊂ M).
     { rewrite H5; unfold Subclass; intros; apply Theorem4; auto. }
-    split; auto; unfold MaxMember; unfold Finite_Char in H; destruct H.
+    split; auto; unfold MaxMember; unfold Finite_Character in H; destruct H.
     unfold En_f1 in H1; apply Axiom_Scheme in H1; destruct H1, H8; intros.
     clear H10; repeat split; auto; intro K; intros; intro.
     unfold ProperSubclass in H11; destruct H11.
@@ -94,10 +94,10 @@ Hint Resolve LemmaH1 : Axiom_of_Choice.
 (* Hypothesis HH2 : forall (A1 F: Class), A1 ⊂ F /\ Finite A1. *)
 
 Lemma LemmaH2 : forall (A: Class),
-  Ensemble A -> Finite_Char \{ λ n, n ⊂ A /\ Nest n \}.
+  Ensemble A -> Finite_Character \{ λ n, n ⊂ A /\ Nest n \}.
 Proof.
   intros.
-  unfold Finite_Char; repeat split; intros.
+  unfold Finite_Character; repeat split; intros.
   - apply Theorem38 in H; auto.
     assert (\{ λ n, n ⊂ A /\ Nest n \} ⊂ pow(A)).
     { unfold Subclass at 1; intros.

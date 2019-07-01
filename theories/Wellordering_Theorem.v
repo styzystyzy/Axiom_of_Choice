@@ -3,7 +3,7 @@ Require Export Zorn_Lemma.
 
 (** Well-Ordering Principle **)
 
-Module Type WellOrder_Principle.
+Module Type WellOrdering_Theorem.
 
 Declare Module Zorn : Zorn_Lemma.
 
@@ -36,7 +36,7 @@ Proof.
   repeat split; auto.
 Qed.
 
-Lemma Lemma_WP1 : forall X, Ensemble X -> PartialOrder (lee X) (En_L X).
+Lemma LemmaW1 : forall X, Ensemble X -> PartialOrder (lee X) (En_L X).
 Proof.
   intros.
   unfold PartialOrder; repeat split.
@@ -114,11 +114,11 @@ Proof.
         add (v0 ∈ Y2) H11; apply H1 in H11; apply H11; auto.
 Qed.
 
-Lemma Lemma_WP2 : forall (X K : Class),
+Lemma LemmaW2 : forall (X K : Class),
   Ensemble X -> Chain K (En_L X) (lee X) -> WellOrder (leeq K) (En_Z K).
 Proof.
   intros; double H.
-  unfold Chain in H0; apply (Lemma_WP1 X) in H1; apply H0 in H1.
+  unfold Chain in H0; apply (LemmaW1 X) in H1; apply H0 in H1.
   clear H0; destruct H1; unfold WellOrder; split.
   - unfold TotalOrder; split; intros.
     { unfold PartialOrder; repeat split.
@@ -322,12 +322,12 @@ Proof.
         split; auto; apply H13; auto.
 Qed.
 
-Lemma Lemma_WP3 : forall (K X: Class),
+Lemma LemmaW3 : forall (K X: Class),
   Ensemble X -> Chain K (En_L X) (lee X) -> exists y, BoundU y K (En_L X) (lee X).
 Proof.
   intros; double H; double H0.
-  apply Lemma_WP2 in H0; auto; exists ([(En_Z K),(leeq K)]).
-  unfold Chain in H2; apply (Lemma_WP1 X) in H1; apply H2 in H1.
+  apply LemmaW2 in H0; auto; exists ([(En_Z K),(leeq K)]).
+  unfold Chain in H2; apply (LemmaW1 X) in H1; apply H2 in H1.
   clear H2; destruct H1; unfold BoundU; intros; destruct H3.
   assert ([En_Z K, leeq K] ∈ (En_L X)).
   { unfold En_L; apply Axiom_SchemeP; split.
@@ -414,13 +414,13 @@ Proof.
            destruct H15, H15; auto.
 Qed.
 
-Theorem WellOrderPrinciple : forall (X: Class),
-  Ensemble X -> exists le0: Class, WellOrder le0 X.
+Theorem WellOrdering : forall (X: Class),
+  Ensemble X -> exists le: Class, WellOrder le X.
 Proof.
   intros.
   assert (PartialOrderSet (En_L X) (lee X)).
-  { unfold PartialOrderSet; try apply Lemma_WP1; auto. }
-  double H0; apply Zorn.Zorn in H1; intros; try apply Lemma_WP3; auto.
+  { unfold PartialOrderSet; try apply LemmaW1; auto. }
+  double H0; apply Zorn.Zorn in H1; intros; try apply LemmaW3; auto.
   destruct H1 as [Y H1]; unfold MaxElement in H1.
   generalize (classic (X = Φ)); intros; destruct H2.
   { rewrite H2; exists Φ; unfold WellOrder; split; intros.
@@ -650,6 +650,6 @@ Proof.
   - rewrite H4 in H6; exists le0; auto.
 Qed.
 
-Hint Resolve WellOrderPrinciple : Axiom_of_Choice.
+Hint Resolve WellOrdering : Axiom_of_Choice.
 
-End WellOrder_Principle.
+End WellOrdering_Theorem.

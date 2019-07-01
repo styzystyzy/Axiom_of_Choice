@@ -8,10 +8,10 @@ Module Type AC_Proof.
 Axiom WellOrderPrinciple : forall (X: Class),
   Ensemble X -> exists le0: Class, WellOrder le0 X.
 
-Definition En_CF X le := \{\ λ x y, x ∈ (pow(X)~[Φ]) /\ y∈x /\ 
+Definition En_cf X le := \{\ λ x y, x ∈ (pow(X)~[Φ]) /\ y∈x /\ 
   (exists z0, MinElement z0 x le /\ y = z0) \}\.
 
-Theorem WellOrder_Choice : forall (X: Class),
+Theorem Proof_Axiom_Choice : forall (X: Class),
   Ensemble X -> exists c, Choice_Function c X.
 Proof.
   intros.
@@ -36,8 +36,8 @@ Proof.
       generalize (Theorem16 ([A,x])); contradiction.
   - double H; apply WellOrderPrinciple in H1.
     destruct H1 as [le H1]; unfold WellOrder in H1; destruct H1.
-    exists (En_CF X le); unfold Choice_Function.
-    assert (Function (En_CF X le)).
+    exists (En_cf X le); unfold Choice_Function.
+    assert (Function (En_cf X le)).
     { unfold Function; split; intros.
       - unfold Relation; intros; PP H3 x y; exists x, y; auto.
       - destruct H3; apply Axiom_SchemeP in H3; apply Axiom_SchemeP in H4.
@@ -88,11 +88,9 @@ Proof.
     + double H4; apply Property_Value in H4; auto; unfold Domain in H5.
       apply Axiom_Scheme in H5; destruct H5, H6 as [y H6]; double H6.
       apply Axiom_SchemeP in H7; destruct H7, H8, H9; clear H10.
-      add ([A,y] ∈ (En_CF X le)) H4; unfold Function in H3.
+      add ([A,y] ∈ (En_cf X le)) H4; unfold Function in H3.
       apply H3 in H4; rewrite H4; auto.
 Qed.
-
-Hint Resolve WellOrder_Choice : Axiom_of_Choice.
 
 End AC_Proof.
 
