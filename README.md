@@ -8,10 +8,10 @@ The axiom of Choice (AC) is an important axiom in axiomatic set theory and it ha
   Defines notations shared by all of the other modules.
 2. Axiomatic_Set_Theory.v
   Provieds a simplified and modified version of the "axiomatic set theory" formal system.
-3. Basic_Definitions.v
-  Defines some notations and provides basic properties.
-4. Finite_Character.v
+3. Finite_Character.v
   Defines the set of finite character based on the definitions of integers and cardinal numbers.
+4. Basic_Definitions.v
+  Defines some notations and provides basic properties.
 5. Tukey_Lemma.v
   Proves Tukey's lemma according to AC.
 6. Hausdorff_Maximal_Principle.v
